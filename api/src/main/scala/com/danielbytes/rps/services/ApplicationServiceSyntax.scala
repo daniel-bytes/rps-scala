@@ -1,16 +1,13 @@
 package com.danielbytes.rps.services
 
-import akka.http.javadsl.server.directives.RouteDirectives
-import akka.http.scaladsl.server.StandardRoute
-import cats.data.EitherT
-import cats.implicits._
+import akka.event.LoggingAdapter
 import com.danielbytes.rps.model.{ ApplicationError, ApplicationErrorException }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationServiceSyntax {
-  implicit class ApiResultSyntax[T](
-      f: Future[Either[ApplicationError, T]]
+  implicit class ApiResultSyntax[T, TErr <: ApplicationError](
+      f: Future[Either[TErr, T]]
   )(
       implicit
       ec: ExecutionContext
@@ -20,9 +17,15 @@ object ApplicationServiceSyntax {
      * into an API result (error as a failed Future)
      * @return
      */
-    def apiResult: Future[T] = f map {
-      case Left(err) => throw ApplicationErrorException(err)
-      case Right(data) => data
+    def apiResult(maybeLogger: Option[LoggingAdapter] = None): Future[T] = f map {
+      case Left(err) => {
+        maybeLogger.foreach(_.warning(s"API error: $err"))
+        throw ApplicationErrorException(err)
+      }
+      case Right(data) => {
+        maybeLogger.foreach(_.info(s"API success: $data"))
+        data
+      }
     }
   }
 }

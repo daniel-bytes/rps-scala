@@ -1,6 +1,5 @@
 import React, { Component, MouseEventHandler } from 'react';
 import * as models from '../models/GameModels'
-import './GameBoard.css'
 
 export interface GameTokenProps {
   x: number
@@ -31,6 +30,17 @@ export default class GameToken extends Component<GameTokenProps> {
     return cssClass
   }
 
+  getTokenType(): string {
+    if (this.props.token) {
+      switch (this.props.token.tokenType) {
+        case 'other': return 'Player 2'
+        default: return this.props.token.tokenType
+      }
+    }
+
+    return ''
+  }
+
   onMouseDown() {
     if (this.isPlayerOwned && this.props.onMouseDown) {
       this.props.onMouseDown(this.props.token)
@@ -44,15 +54,13 @@ export default class GameToken extends Component<GameTokenProps> {
   }
   
   render() {
-    const text = this.props.token ? this.props.token.tokenType : ``
-
     return (
       <td 
         className={this.getCssClass()} 
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
       >
-        {text}
+        {this.getTokenType()}
       </td>
     )
   }

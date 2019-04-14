@@ -2,6 +2,8 @@ package com.danielbytes.rps.api
 
 import akka.http.scaladsl.server._
 import Directives._
+import akka.actor.ActorSystem
+import akka.event.Logging
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import com.danielbytes.rps.model._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -11,7 +13,7 @@ import io.circe.generic.auto._
 case class ErrorResponse(code: String)
 
 object ApplicationErrorHandler {
-  implicit def handleRejections: RejectionHandler =
+  implicit def handleRejections(implicit system: ActorSystem): RejectionHandler =
     RejectionHandler.newBuilder()
       .handle {
         case AuthorizationFailedRejection =>

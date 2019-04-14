@@ -31,10 +31,24 @@ export interface Token {
 export interface Game {
   gameId: string
   playerId: string
-  otherPlayerId: string
+  playerName: string
+  otherPlayerName: string
   isPlayerTurn: boolean
   isGameOver: boolean
-  winnerId: string | null
+  winnerName: string | null
   board: Geometry
   tokens: Token[]
+}
+
+export interface GamesOverview {
+  games: GameOverview[]
+}
+
+export interface GameOverview {
+  id: string
+  playerId: string
+  playerName: string
+  otherPlayerName: string
+  isGameOver: boolean
+  winnerName: string | null
 }

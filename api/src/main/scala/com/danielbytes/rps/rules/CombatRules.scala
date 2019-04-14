@@ -1,4 +1,4 @@
-package com.danielbytes.rps.engine
+package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.model._
 
@@ -39,4 +39,5 @@ trait CombatRules {
   }
 }
 
-object CombatRulesEngine extends CombatRules
+class CombatRulesEngine()
+  extends CombatRules {}

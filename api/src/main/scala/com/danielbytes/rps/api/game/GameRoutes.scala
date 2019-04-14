@@ -7,17 +7,20 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MethodDirectives.get
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.server.directives.PathDirectives.path
-import com.danielbytes.rps.api.ApplicationSessionDirectives._
-import com.danielbytes.rps.engine.GameRules
+import com.danielbytes.rps.api.session.ApplicationSessionDirectives
+import com.danielbytes.rps.helpers.{ DateTimeHelper, Helpers }
 import com.danielbytes.rps.services.ApplicationServiceSyntax._
-import com.danielbytes.rps.model.GameId
+import com.danielbytes.rps.model.{ GameId, GameInProgress, User }
 import com.danielbytes.rps.services.GameService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 
-trait GameRoutes extends GameService {
+trait GameRoutes
+    extends ApplicationSessionDirectives
+    with Helpers {
   implicit def system: ActorSystem
-  implicit def rules: GameRules
+  implicit def gameService: GameService
+  private lazy val logger = Logging.getLogger(system, this)
 
   lazy val gameRoutes: Route = pathPrefix("games") {
     requireSession { _ =>
@@ -26,29 +29,44 @@ trait GameRoutes extends GameService {
           post {
             entity(as[GameMoveApiModel]) { req =>
               complete(
-                processTurn(GameId(id), session.playerId, req.from, req.to)
-                  .apiResult
-                  .map(r => GameApiModel(r.game, session.playerId, r.status))
+                gameService.processTurn(GameId(id), session.userId, req.from, req.to)
+                  .apiResult(Some(logger))
+                  .map(r => GameApiModel(r.game, session.userId, r.status))
               )
             }
           }
         } ~
           path(Segment) { id =>
-            pathEndOrSingleSlash {
-              get {
+            get {
+              complete(
+                gameService.getGame(GameId(id), session.userId)
+                  .apiResult()
+                  .map(r => GameApiModel(r.game, session.userId, r.status))
+              )
+            } ~
+              delete {
                 complete(
-                  getGame(GameId(id), session.playerId)
-                    .apiResult
-                    .map(r => GameApiModel(r.game, session.playerId, r.status))
+                  gameService.deleteGame(GameId(id), session.userId)
                 )
-              } ~
-                //post {},
-                delete {
-                  complete(
-                    deleteGame(GameId(id), session.playerId)
-                  )
-                }
-            }
+              }
+          } ~
+          pathEndOrSingleSlash {
+            get {
+              complete(
+                gameService.getPlayerGames(session.userId, includeCompleted = true)
+                  .apiResult()
+                  .map(r => GameOverviewsApiModel(
+                    r.map(g => GameOverviewApiModel(session.userId, g))
+                  ))
+              )
+            } ~
+              post {
+                complete(
+                  gameService.createGame(User(session))
+                    .apiResult()
+                    .map(r => GameApiModel(r.game, session.userId, r.status))
+                )
+              }
           }
       }
     }

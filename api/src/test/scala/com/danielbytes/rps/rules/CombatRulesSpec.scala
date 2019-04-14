@@ -1,6 +1,8 @@
-package com.danielbytes.rps.engine
+package com.danielbytes.rps.rules
 
 import com.danielbytes.rps
+import com.danielbytes.rps.GameTestData
+import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.model._
 import org.scalatest._
 
@@ -8,13 +10,14 @@ class CombatRulesSpec
     extends WordSpec
     with Matchers
     with CombatRules
-    with rps.GameTestData {
+    with GameTestData
+    with Helpers {
   "CombatRules" should {
     "handle attackPlayer rules" should {
       for { attackerToken <- Token.types; defenderToken <- Token.types } {
         s"$attackerToken attacks $defenderToken" in {
-          val attacker = Token(p1, attackerToken)
-          val defender = Token(p2, defenderToken)
+          val attacker = Token(pid1, attackerToken)
+          val defender = Token(pid2, defenderToken)
           val results = attackPlayer(attacker, defender)
 
           (attackerToken, defenderToken) match {

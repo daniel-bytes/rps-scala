@@ -1,17 +1,39 @@
 package com.danielbytes.rps.model
 
-/**
- * A player's Identifier
- * @param value
- */
-case class PlayerId(value: String) extends AnyVal
+import com.danielbytes.rps.helpers.DateTimeHelper
 
 /**
  * A game player (either human or AI)
  */
 case class Player(
-  id: PlayerId,
-  name: String,
-  position: StartPosition,
-  isAI: Boolean
-)
+    user: User,
+    position: StartPosition
+) {
+  def id: UserId = user.id
+  def name: UserName = user.name
+  def isAI: Boolean = user.isAI
+}
+
+object Player {
+  def ai(
+    position: StartPosition = StartPositionTop
+  )(
+    implicit
+    dateTime: DateTimeHelper
+  ): Player = Player(
+    User.ai(),
+    position
+  )
+
+  def native(
+    userId: UserId,
+    userName: UserName,
+    position: StartPosition = StartPositionTop
+  )(
+    implicit
+    dateTime: DateTimeHelper
+  ): Player = Player(
+    User.native(userId, userName),
+    position
+  )
+}

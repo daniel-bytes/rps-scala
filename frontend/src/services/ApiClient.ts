@@ -17,6 +17,27 @@ export default class ApiClient {
     return this.handleResponse<TRes>(response)
   }
 
+  async maybeGetAsync<TRes>(url: string): Promise<models.ApiResponse<TRes | null>> {
+    const response = await fetch(url, {
+      method: `GET`,
+      headers: this.getHeaders()
+    })
+
+    try {
+      return await this.handleResponse<TRes>(response)
+    } catch(e) {
+      if (e instanceof errors.ApiError && e.status === 404) {
+        return {
+          status: e.status,
+          body: null,
+          headers: e.headers
+        }
+      } else {
+        throw e
+      }
+    }
+  }
+
   async postAsync<TRes>(
     url: string, 
     req: object
@@ -91,6 +112,9 @@ export default class ApiClient {
       message = await response.text()
     }
 
-    throw new errors.ApiError(response.status, message)
+    throw new errors.ApiError(
+      response.status, 
+      message,
+      new Map<string, string>(response.headers))
   }
 }

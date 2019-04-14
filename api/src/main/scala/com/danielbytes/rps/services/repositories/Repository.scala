@@ -1,4 +1,4 @@
-package com.danielbytes.rps.services
+package com.danielbytes.rps.services.repositories
 
 import scala.concurrent.Future
 

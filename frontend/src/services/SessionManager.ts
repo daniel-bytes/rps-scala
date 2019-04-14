@@ -1,83 +1,119 @@
-import * as models from '../models/SessionModels'
+import * as session from '../models/SessionModels'
+import * as user from '../models/UserModels'
 import ApiClient from './ApiClient'
+import { GoogleAuthService } from './GoogleAuthService'
+
+
 
 /**
  * Service for managing a user's session token
  */
 export default class SessionManager {
   private readonly _url = `/session`
-  private readonly _name: string
-  private readonly _key: string
+  private readonly _sessionStateKey = `session-state`
+  private readonly _google: GoogleAuthService
   private readonly _api: ApiClient
   private _apiWithToken: ApiClient
 
-  constructor(name: string) {
-    this._name = name
-    this._key = `session-token-${name}`
+  constructor(google: GoogleAuthService) {
+    this._google = google
     this._api = new ApiClient()
     this._apiWithToken = new ApiClient(this.getToken())
   }
 
-  hasToken(): boolean {
-    return this.getToken() !== null
+  async initialize(): Promise<SessionManager> {
+    await this._google.initialize()
+    return this
   }
 
   getApiClient(): ApiClient {
     return this._apiWithToken
   }
 
-  /**
-   * Gets a valid session token, either from local storage or
-   * directly from the API server
-   * @param forceRefresh If true, a new token will always be requested
-   */
-  async getTokenAsync(forceRefresh: boolean = false): Promise<string> {
-    let token = null
+  clearSessionState() {
+    localStorage.removeItem(this._sessionStateKey)
+  }
 
-    if (!forceRefresh) {
-      token = await this.validateTokenAsync()
-    }
+  getSessionState(): session.SessionState | null {
+    const state = localStorage.getItem(this._sessionStateKey)
 
-    if (token) {
-      console.log(`Session token valid for user [${this._name}]`)
-      return token as string
+    if (state) {
+      return JSON.parse(state) as session.SessionState
     } else {
-      return this.loadTokenAsync()
+      return null
     }
+  }
+
+  getGameId(): string | null {
+    const session = this.getSessionState()
+
+    if (session) {
+      return session.gameId
+    } else {
+      return null
+    }
+  }
+
+  setGameId(id: string | null) {
+    const session = this.getSessionState()
+
+    if (session) {
+      session.gameId = id
+      this.setSessionState(session)
+    }
+  }
+
+  async requestGoogleTokenAsync(): Promise<session.SessionState> {
+    const user = await this._google.requestToken()
+    const result = await this.loadTokenAsync(user)
+    
+    return result
   }
 
   /**
    * Returns a session token from local storage, or null if not found
    */
   private getToken(): string | null {
-    return localStorage.getItem(this._key)
+    const session = this.getSessionState()
+
+    if (session) {
+      return session.token
+    } else {
+      return null
+    }
   }
 
-  /**
-   * Stores a token in local storage
-   * @param token The session token
-   */
-  private setToken(token: string): string {
-    localStorage.setItem(this._key, token)
-    this._apiWithToken = new ApiClient(token)
-    return token
+  private setSessionState(state: session.SessionState) {
+    localStorage.setItem(this._sessionStateKey, JSON.stringify(state))
+    return state
   }
 
   /**
    * Creates a new token by POST-ing to the API server
    */
-  private async loadTokenAsync(): Promise<string> {
-    console.log(`Requesting new session token from server for user [${this._name}]`)
+  async loadTokenAsync(user: user.User): Promise<session.SessionState> {
+    console.log(`Requesting new session token from server for user [${user.name}]`)
 
-    const request = { name: this._name }
-    const response = await this._api.postAsync<object>(this._url, request)
-    const token = response.headers.get(`Set-Authorization`)
+    const request = {
+      id: user.id,
+      name: user.name,
+      authCode: user.authCode
+    }
 
-    if (token) {
-      console.log(`Session token loaded for user [${this._name}]`)
-      return this.setToken(token)
+    const response = await this._api.postAsync<object>(this._url + '/google', request)
+    
+    if (response.status === 200) {
+      const token = response.headers.get(`set-authorization`)
+
+      if (token) {
+        console.log(`Session token loaded for user [${user.name}]`)
+        return this.setSessionState({ user, token, gameId: null })
+      } else {
+        throw new Error(`Auth token was null`)
+      }
     } else {
-      throw new Error(`Auth token was null`)
+      console.error(response)
+      throw new Error(`Token request failed with ${response.status}`)
     }
   }
 
@@ -86,17 +122,18 @@ export default class SessionManager {
    * If no token is stored, or the token is invalid, null is returned.
    * If token is valid, the token is returned.
    */
-  private async validateTokenAsync(): Promise<string | null> {
-    console.log(`Checking for valid session token in local storage for user [${this._name}]`)
+  async validateSessionAsync(): Promise<session.SessionState | null> {
+    console.log(`Checking for valid session token in local storage`)
+    const sessionState = this.getSessionState()
 
-    if (!this.hasToken()) {
-      return new Promise(res => res(null))
-    }
+    if (sessionState) {
+      const response = await this._apiWithToken.getAsync<session.SessionResponse>(this._url)
 
-    const response = await this._apiWithToken.getAsync<models.SessionResponse>(this._url)
-
-    if (response.body.playerId) {
-      return this.getToken()
+      if (response.body.sessionId) {
+        return sessionState
+      } else {
+        return null
+      }
     } else {
       return null
     }

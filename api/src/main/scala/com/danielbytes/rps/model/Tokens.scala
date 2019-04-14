@@ -25,7 +25,7 @@ case object Flag extends TokenType {
 }
 
 case class Token(
-    owner: PlayerId,
+    owner: UserId,
     tokenType: TokenType
 ) {
   def movable: Boolean = tokenType match {

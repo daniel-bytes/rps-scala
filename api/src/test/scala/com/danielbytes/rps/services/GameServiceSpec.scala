@@ -1,7 +1,10 @@
 package com.danielbytes.rps.services
 
+import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.{ GameTestData, TestUtils }
 import com.danielbytes.rps.model._
+import com.danielbytes.rps.rules.Rules
+import com.danielbytes.rps.services.repositories.InMemoryGameRepository
 import org.scalatest._
 
 import scala.concurrent.ExecutionContext
@@ -10,24 +13,68 @@ class GameServiceSpec
     extends WordSpec
     with Matchers
     with GameTestData
-    with TestUtils {
+    with TestUtils
+    with Helpers
+    with Rules {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  def gameService(game: Option[Game] = None): GameService = {
-    val repository = new InMemoryRepository[GameId, Game]()
-    game.foreach(g => repository.set(g.id, g))
+  def gameService(
+    games: List[Game] = Nil
+  ): GameService = {
+    val gameRepo = new InMemoryGameRepository()
+    games.foreach(g => gameRepo.set(g.id, g))
 
-    new GameServiceImpl()(ec, repository)
+    new GameServiceImpl()(ec, gameRepo, gameRules, aiRules, boardRules, random)
   }
 
   "GameService" should {
+    "handle getPlayerGames" should {
+      "return a players games" in {
+        wait(gameService(List(game, completedGame)).getPlayerGames(pid1, includeCompleted = false)) should ===(
+          Right(
+            List(
+              GameWithStatus(
+                game,
+                GameInProgress
+              )
+            )
+          )
+        )
+      }
+
+      "return completed games" in {
+        wait(gameService(List(game, completedGame)).getPlayerGames(pid1, includeCompleted = true)) should ===(
+          Right(
+            List(
+              GameWithStatus(
+                game,
+                GameInProgress
+              ),
+              GameWithStatus(
+                completedGame,
+                GameOverFlagCaptured(pid1)
+              )
+            )
+          )
+        )
+      }
+
+      "return nothing for an unknown player" in {
+        wait(gameService(List(game, completedGame)).getPlayerGames(UserId("baduser"), includeCompleted = false)) should ===(
+          Right(
+            List()
+          )
+        )
+      }
+    }
+
     "handle processTurn" should {
       "allow a token move" in {
-        wait(gameService(Some(game)).processTurn(gid, p1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService(List(game)).processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
           Right(
-            PlayerTurnResult(
+            GameWithStatus(
               game.copy(
-                currentPlayerId = p2,
+                currentPlayerId = pid2,
                 board = game.board.copy(
                   tokens = Map( /*
                           ----------------
@@ -38,10 +85,10 @@ class GameServiceSpec
                       y0  | F1 |    |    |
                           ----------------
                             x0   x1   x2   */
-                    Point(0, 0) -> Token(p1, Flag),
-                    Point(1, 1) -> Token(p1, Rock),
-                    Point(0, 2) -> Token(p2, Scissor),
-                    Point(2, 2) -> Token(p2, Flag)
+                    Point(0, 0) -> Token(pid1, Flag),
+                    Point(1, 1) -> Token(pid1, Rock),
+                    Point(0, 2) -> Token(pid2, Scissor),
+                    Point(2, 2) -> Token(pid2, Flag)
                   )
                 )
               ),
@@ -52,9 +99,9 @@ class GameServiceSpec
       }
 
       "allow a token move followed by an AI move" in {
-        wait(gameService(Some(gameWithAI)).processTurn(gid, p1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService(List(gameWithAI)).processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
           Right(
-            PlayerTurnResult(
+            GameWithStatus(
               gameWithAI.copy(
                 board = game.board.copy(
                   tokens = Map( /*
@@ -66,12 +113,62 @@ class GameServiceSpec
                       y0  | F1 |    |    |
                           ----------------
                             x0   x1   x2   */
-                    Point(0, 0) -> Token(p1, Flag),
-                    Point(1, 1) -> Token(p1, Rock),
-                    Point(0, 1) -> Token(p2, Scissor),
-                    Point(2, 2) -> Token(p2, Flag)
+                    Point(0, 0) -> Token(pid1, Flag),
+                    Point(1, 1) -> Token(pid1, Rock),
+                    Point(0, 1) -> Token(pid2, Scissor),
+                    Point(2, 2) -> Token(pid2, Flag)
                   )
-                )
+                ),
+                currentPlayerId = pid1
+              ),
+              GameInProgress
+            )
+          )
+        )
+      }
+
+      "AI move winning an attack correctly sets currentPlayerId to human player" in {
+        val newGame = gameWithAI.copy(
+          board = gameWithAI.board.copy(
+            tokens = Map( /*
+                        ----------------
+                    y2  | S2 |    | F2 |
+                        ----------------
+                    y1  | P1 | S1 |    |
+                        ----------------
+                    y0  | F1 |    |    |
+                        ----------------
+                          x0   x1   x2   */
+
+              Point(0, 0) -> Token(pid1, Flag),
+              Point(0, 1) -> Token(pid1, Paper),
+              Point(1, 1) -> Token(pid1, Scissor),
+              Point(0, 2) -> Token(pid2, Scissor),
+              Point(2, 2) -> Token(pid2, Flag)
+            )
+          )
+        )
+        wait(gameService(List(newGame)).processTurn(gid, pid1, Point(1, 1), Point(2, 1))) should ===(
+          Right(
+            GameWithStatus(
+              newGame.copy(
+                board = game.board.copy(
+                  tokens = Map( /*
+                        ---------------
+                    y2  | |  |   | F2 |
+                        --v------------
+                    y1  | S2 | --> S1 |
+                        ---------------
+                    y0  | F1 |   |    |
+                        ---------------
+                          x0   x1   x2   */
+                    Point(0, 0) -> Token(pid1, Flag),
+                    Point(2, 1) -> Token(pid1, Scissor),
+                    Point(0, 1) -> Token(pid2, Scissor),
+                    Point(2, 2) -> Token(pid2, Flag)
+                  )
+                ),
+                currentPlayerId = pid1
               ),
               GameInProgress
             )
@@ -80,7 +177,7 @@ class GameServiceSpec
       }
 
       "fail when game does not exist" in {
-        wait(gameService().processTurn(gid, p1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService().processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
           Left(GameNotFoundError)
         )
       }
@@ -88,9 +185,9 @@ class GameServiceSpec
 
     "handle getGame" should {
       "return a game" in {
-        wait(gameService(Some(game)).getGame(gid, p1)) should ===(
+        wait(gameService(List(game)).getGame(gid, pid1)) should ===(
           Right(
-            PlayerTurnResult(
+            GameWithStatus(
               game,
               GameInProgress
             )
@@ -99,7 +196,7 @@ class GameServiceSpec
       }
 
       "fail when game does not exist" in {
-        wait(gameService().getGame(gid, p1)) should ===(
+        wait(gameService().getGame(gid, pid1)) should ===(
           Left(GameNotFoundError)
         )
       }
@@ -107,13 +204,13 @@ class GameServiceSpec
 
     "handle deleteGame" should {
       "delete a game" in {
-        wait(gameService(Some(game)).deleteGame(gid, p1)) should ===(
+        wait(gameService(List(game)).deleteGame(gid, pid1)) should ===(
           Right(())
         )
       }
 
       "fail when game does not exist" in {
-        wait(gameService().deleteGame(gid, p1)) should ===(
+        wait(gameService().deleteGame(gid, pid1)) should ===(
           Left(GameNotFoundError)
         )
       }

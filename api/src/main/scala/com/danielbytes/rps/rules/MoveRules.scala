@@ -1,4 +1,4 @@
-package com.danielbytes.rps.engine
+package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.model._
 
@@ -9,7 +9,7 @@ trait MoveRules {
   /**
    * Move a token from one point to another
    * @param game The game
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @param from The point where the token is being moved from
    * @param to The point where the token is being moved to
    * @return The result of the move:
@@ -18,12 +18,12 @@ trait MoveRules {
    */
   def moveToken(
     game: Game,
-    playerId: PlayerId,
+    userId: UserId,
     from: Point,
     to: Point
   ): Either[RuleViolationError, MoveResult] = {
     for {
-      _ <- validatePlayer(game, playerId)
+      _ <- validatePlayer(game, userId)
       source <- validateSourceToken(game, from)
       dest <- validateDestinationToken(game, from, to)
       result <- validateMove(game, from, source, to, dest)
@@ -33,14 +33,14 @@ trait MoveRules {
   /**
    * Validates that the player taking a turn is valid
    * @param game The current game state
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @return The validation result
    */
   private def validatePlayer(
     game: Game,
-    playerId: PlayerId
+    userId: UserId
   ): Either[RuleViolationError, Unit] = {
-    if (game.currentPlayer.id == playerId) {
+    if (game.currentPlayer.id == userId) {
       Right(())
     } else {
       Left(WrongPlayerTurnError)
@@ -138,5 +138,5 @@ trait MoveRules {
   }
 }
 
-object MoveRulesEngine extends MoveRules
-
+class MoveRulesEngine()
+  extends MoveRules {}

@@ -42,3 +42,39 @@ sealed trait GameServiceError extends ApplicationError
 case object GameNotFoundError extends GameServiceError {
   override def status: StatusCode = StatusCodes.NotFound
 }
+
+case object PlayerNotFoundError extends GameServiceError {
+  override def status: StatusCode = StatusCodes.NotFound
+}
+
+sealed trait AuthenticationError extends ApplicationError
+case class AuthenticationFailedError(msg: String) extends AuthenticationError
+
+/**
+ * An error that indicates the game board geometry is in an invalid and unfixable state
+ */
+case class BoardGeometryException(
+  rows: Int,
+  columns: Int
+) extends IllegalStateException(s"Illegal game board geometry: $rows rows, $columns columns.")
+
+/**
+ * An error that indicates the game player is incorrect
+ */
+case class IncorrectPlayerException() extends IllegalStateException(s"Illegal player.")
+
+/**
+ * An error that indicates the game board token count is invalid
+ */
+case class BoardTokenCountException(
+  rows: Int,
+  columns: Int,
+  flagCount: Int,
+  bombCount: Int,
+  rockCount: Int,
+  paperCount: Int,
+  scissorCount: Int
+) extends IllegalStateException(
+  s"Illegal token count for game board token count: $rows rows, $columns columns, " +
+    s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
+)

@@ -1,4 +1,4 @@
-package com.danielbytes.rps.engine
+package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.model._
 
@@ -13,20 +13,21 @@ trait GameRules {
   /**
    * A player takes a turn in the game
    * @param game The game state
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @param from The point where the player token is moving from
    * @param to The point where the player token is moving to
    * @return The updated game state, or an error condition
    */
   def gameTurn(
     game: Game,
-    playerId: PlayerId,
+    userId: UserId,
     from: Point,
     to: Point
   ): Either[RuleViolationError, Game] = {
     for {
-      moveResult <- moveRules.moveToken(game, playerId, from, to)
-      result <- handleMove(game, from, to, moveResult)
+      moveResult <- moveRules.moveToken(game, userId, from, to)
+      gameResult <- handleMove(game, from, to, moveResult)
+      result = gameResult.copy(currentPlayerId = game.otherPlayer.id)
     } yield result
   }
 
@@ -50,11 +51,11 @@ trait GameRules {
     else if (hasFlag.isEmpty)
       Left(NoFlags)
     else if (hasFlag.size == 1)
-      Right(GameOverFlagCaptured(hasFlag.head.playerId))
+      Right(GameOverFlagCaptured(hasFlag.head.userId))
     else if (canMove.isEmpty)
       Right(GameOverStalemate)
     else if (canMove.size == 1)
-      Right(GameOverNoMoreTokens(canMove.head.playerId))
+      Right(GameOverNoMoreTokens(canMove.head.userId))
     else
       Right(GameInProgress)
   }
@@ -125,8 +126,7 @@ trait GameRules {
     Right(game.copy(
       board = game.board.copy(
         tokens = (tokens - from - to) + (to -> token)
-      ),
-      currentPlayerId = game.otherPlayer.id
+      )
     ))
   }
 
@@ -170,18 +170,19 @@ trait GameRules {
 
   /**
    * Simple internal struct for managing a player's game state
-   * @param playerId The player's Id
+   * @param userId The player's Id
    * @param hasFlag True if the player has a flag
    * @param canMove True if the player can move
    */
   private case class PlayerState(
-    playerId: PlayerId,
+    userId: UserId,
     hasFlag: Boolean,
     canMove: Boolean
   )
 }
 
-object GameRulesEngine extends GameRules {
-  implicit def moveRules: MoveRules = MoveRulesEngine
-  implicit def combatRules: CombatRules = CombatRulesEngine
-}
+class GameRulesEngine()(
+  implicit
+  val moveRules: MoveRules,
+  val combatRules: CombatRules
+) extends GameRules {}

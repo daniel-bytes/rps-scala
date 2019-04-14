@@ -13,13 +13,48 @@ case class TokenApiModel(
   playerOwned: Boolean
 )
 
+case class GameOverviewApiModel(
+  id: String,
+  playerId: String,
+  playerName: String,
+  otherPlayerName: String,
+  isGameOver: Boolean,
+  winnerName: Option[String]
+)
+
+object GameOverviewApiModel {
+  def apply(userId: UserId, model: GameWithStatus): GameOverviewApiModel = {
+    val player = model.game.player(userId).getOrElse(throw IncorrectPlayerException())
+    val other = model.game.notPlayer(userId)
+
+    val (gameOver: Boolean, winnerName: Option[String]) = model.status match {
+      case GameInProgress => (false, None)
+      case s: GameOverStatus => (true, s.winnerId.flatMap(id => model.game.player(id)).map(_.user.name.value))
+    }
+
+    GameOverviewApiModel(
+      model.game.id.value,
+      player.id.value,
+      player.user.name.value,
+      other.user.name.value,
+      gameOver,
+      winnerName
+    )
+  }
+}
+
+case class GameOverviewsApiModel(
+  games: List[GameOverviewApiModel]
+)
+
 case class GameApiModel(
   gameId: String,
   playerId: String,
-  otherPlayerId: String,
+  playerName: String,
+  otherPlayerName: String,
   isPlayerTurn: Boolean,
   isGameOver: Boolean,
-  winnerId: Option[String],
+  winnerName: Option[String],
   board: Geometry,
   tokens: List[TokenApiModel]
 )
@@ -27,31 +62,37 @@ case class GameApiModel(
 object GameApiModel {
   def apply(
     game: Game,
-    playerId: PlayerId,
+    userId: UserId,
     gameStatus: GameStatus
   ): GameApiModel = {
     val board = for {
       x <- 0 to game.board.geometry.columns
       y <- 0 to game.board.geometry.rows
       token = game.board.tokens.get(Point(x, y))
-      playerOwned = token.exists(_.owner == playerId)
+      playerOwned = token.exists(_.owner == userId)
       tokenType <- token.map { t => if (playerOwned) t.tokenType.name else "other" }
     } yield TokenApiModel(Point(x, y), tokenType, playerOwned)
 
-    val (gameOver: Boolean, winnerId: Option[String]) = gameStatus match {
+    val (isGameOver: Boolean, winnerId: Option[UserId]) = gameStatus match {
       case GameInProgress => (false, None)
-      case s: GameOverStatus => (true, s.winnerId.map(_.value))
+      case s: GameOverStatus => (true, s.winnerId)
     }
 
+    val player = game.player(userId).getOrElse(throw IncorrectPlayerException())
+    val otherPlayer = game.notPlayer(userId)
+    val maybeWinningPlayer = winnerId.map(id => game.player(id).getOrElse(throw IncorrectPlayerException()))
+    val isPlayerTurn = /*if (game.playerList.exists(_.isAI)) true else*/ userId == game.currentPlayer.id
+
     GameApiModel(
-      game.id.value,
-      playerId.value,
-      game.playerList.filterNot(_.id == playerId).head.id.value,
-      playerId == game.currentPlayer.id,
-      gameOver,
-      winnerId,
-      game.board.geometry,
-      board.toList
+      gameId = game.id.value,
+      playerId = player.id.value,
+      playerName = player.name.value,
+      otherPlayerName = otherPlayer.name.value,
+      isPlayerTurn = isPlayerTurn,
+      isGameOver = isGameOver,
+      winnerName = maybeWinningPlayer.map(_.name.value),
+      board = game.board.geometry,
+      tokens = board.toList
     )
   }
 }

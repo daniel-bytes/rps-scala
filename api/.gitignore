@@ -16,3 +16,4 @@ target/
 .project
 .settings
 src/main/resources/build/
+src/main/resources/google-auth.json

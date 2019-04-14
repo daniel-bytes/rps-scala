@@ -3,14 +3,14 @@ import * as models from '../models/GameModels'
 import GameEngine from '../services/GameEngine'
 import GameService from '../services/GameService'
 import GameToken from './GameToken'
-import './GameBoard.css'
 
 export interface GameBoardProps {
+  game: GameEngine
   gameService: GameService
 }
 
 export interface GameBoardState {
-  game: GameEngine | null
+  game: GameEngine
   selectedToken: models.Token | undefined
   targetPoints: models.Point[]
 }
@@ -19,15 +19,26 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
   constructor(props: GameBoardProps) {
     super(props)
     this.state = { 
-      game: null, 
+      game: props.game, 
       selectedToken: undefined,
       targetPoints: []
     }
   }
 
-  async componentDidMount() {
-    const game = await this.props.gameService.loadGameAsync()
-    this.setState({ game })
+  get currentPlayerName(): string {
+    if (this.state.game.model.isPlayerTurn) {
+      return this.state.game.model.playerName
+    } else {
+      return this.state.game.model.otherPlayerName
+    }
+  }
+
+  get currentGame(): GameEngine {
+    return this.state.game
+  }
+
+  get currentGameId(): string {
+    return this.currentGame.model.gameId
   }
 
   getTableRows(game: GameEngine): JSX.Element[] {
@@ -61,8 +72,8 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
     if (!this.canMove()) return
     let targets: models.Point[] = []
 
-    if (this.state.game && t) {
-      targets = this.state.game.getTargetPoints(t.position)
+    if (t) {
+      targets = this.currentGame.getTargetPoints(t.position)
     }
 
     this.setState({
@@ -73,11 +84,11 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
 
   onMouseUp(t: models.Token | undefined, p: models.Point) {
     if (!this.canMove()) return
-    if (!!this.state.selectedToken && !!this.state.game) {
+    if (!!this.state.selectedToken) {
       const move = { from: this.state.selectedToken.position, to: p }
 
-      if (this.state.game.isValidMove(move)) {
-        return this.props.gameService.gameMoveAsync(move).then(result => {
+      if (this.currentGame.isValidMove(move)) {
+        return this.props.gameService.gameMoveAsync(this.currentGameId, move).then(result => {
           this.setState({
             selectedToken: undefined,
             targetPoints: [],
@@ -94,13 +105,13 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
   }
 
   getHeader() {
-    if (this.state.game) {
-      if (this.state.game.model.isGameOver) {
-        return `Game Over: ${this.state.game.model.winnerId} wins!`
+    if (this.currentGame) {
+      if (this.currentGame.model.isGameOver) {
+        return `Game Over: ${this.currentGame.model.winnerName} wins!`
       }
 
-      if (this.state.game.canMove) {
-        return 'Your Turn'
+      if (this.currentGame.canMove) {
+        return `${this.currentPlayerName}'s Turn`
       }
     }
 
@@ -129,11 +140,11 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
   }
 
   canMove(): boolean {
-    return !!this.state.game && this.state.game.canMove()
+    return this.currentGame.canMove()
   }
 
   render() {
-    const rows = this.state.game ? this.getTableRows(this.state.game) : []
+    const rows = this.getTableRows(this.state.game)
 
     return (
       <div className='Container'>

@@ -12,3 +12,72 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.App {
+  text-align: center;
+}
+
+.AppBody {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.Container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  width: 100%;
+}
+
+.CanvasHeader {
+  min-height: 100px;
+  width: 100%;
+}
+
+.CanvasBody {
+  flex: 1;
+  text-align: center;
+}
+
+.CanvasTable {
+  table-layout: fixed;
+  width: 500px;
+  height: 100px;
+  border: solid white 1px;
+  border-spacing: 0;
+  margin-left:auto; 
+  margin-right:auto;
+}
+
+.CanvasTableRow {
+  width: 500px;
+  height: 130px;
+}
+
+.CanvasTableCell {
+  border: solid white 1px;
+  user-select: none;
+}
+
+.PlayerCell {
+  cursor: pointer;
+}
+
+.SelectedCell {
+  border-color: blue;
+}
+
+.TargetCell {
+  border-color: red;
+}
+

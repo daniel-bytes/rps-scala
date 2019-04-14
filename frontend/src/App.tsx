@@ -1,43 +1,26 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import GameBoard from './components/GameBoard'
-import GameService from './services/GameService'
-import SessionManager from './services/SessionManager'
+import React from 'react';
+import AuthedApp from './components/AuthedApp'
+import { GoogleAuthService } from './services/GoogleAuthService';
+import SessionManager from './services/SessionManager';
 
 interface Props {}
-interface State { ready: boolean }
 
-class App extends Component<Props, State> {
-  private sessionManager = new SessionManager(`player1`)
-  private gameService = new GameService('game1', this.sessionManager)
+export const App: React.SFC<Props> = (props) => {
+  const sessionManager = new SessionManager(
+    new GoogleAuthService({
+      apiScriptUrl: "https://apis.google.com/js/api.js",
+      clientId: "391796029454-had3equ00f3qr29bu1hg5rrv927nr0h1.apps.googleusercontent.com",
+      scope: "profile email",
+      document: document,
+      window: window
+    })
+  )
 
-  constructor(props: Props) {
-    super(props)
-    this.state = { ready: false }
-  }
-
-  async componentDidMount() {
-    await this.sessionManager.getTokenAsync()
-    this.setState({ ready: true })
-
-    const game = await this.gameService.loadGameAsync()
-    console.log(game)
-  }
-
-  render() {
-    const inner = this.state.ready ? (
-      <div>Welcome!</div>
-    ) : ( <div>Loading... </div> )
-
-    return (
-      <div className="App">
-        <header className="AppBody">
-          <GameBoard gameService={this.gameService} />
-        </header>
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <AuthedApp sessionManager={sessionManager} />
+    </div>
+  )
 }
 
 export default App;

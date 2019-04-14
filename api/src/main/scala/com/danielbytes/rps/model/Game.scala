@@ -5,27 +5,27 @@ sealed trait GameStatus
 case object GameInProgress extends GameStatus
 
 sealed trait GameOverStatus extends GameStatus {
-  def winnerId: Option[PlayerId]
+  def winnerId: Option[UserId]
 }
 
 case object GameOverStalemate extends GameOverStatus {
-  def winnerId: Option[PlayerId] = None
+  def winnerId: Option[UserId] = None
 }
 
-case class GameOverFlagCaptured(winner: PlayerId) extends GameOverStatus {
-  def winnerId: Option[PlayerId] = Some(winner)
+case class GameOverFlagCaptured(winner: UserId) extends GameOverStatus {
+  def winnerId: Option[UserId] = Some(winner)
 }
 
-case class GameOverNoMoreTokens(winner: PlayerId) extends GameOverStatus {
-  def winnerId: Option[PlayerId] = Some(winner)
+case class GameOverNoMoreTokens(winner: UserId) extends GameOverStatus {
+  def winnerId: Option[UserId] = Some(winner)
 }
 
 case class Board(
     geometry: Geometry,
     tokens: Map[Point, Token]
 ) {
-  def playerTokens(playerId: PlayerId): List[Token] = {
-    tokens.values.filter(_.owner == playerId).toList
+  def playerTokens(userId: UserId): List[Token] = {
+    tokens.values.filter(_.owner == userId).toList
   }
 }
 
@@ -35,7 +35,7 @@ case class Game(
     id: GameId,
     player1: Player,
     player2: Player,
-    currentPlayerId: PlayerId,
+    currentPlayerId: UserId,
     board: Board
 ) {
   val playerList = List(player1, player2)
@@ -56,7 +56,28 @@ case class Game(
       .head
   }
 
-  def withCurrentPlayer(playerId: PlayerId): Game = {
-    this.copy(currentPlayerId = playerId)
+  def player(id: UserId): Option[Player] = {
+    playerList
+      .find(_.id == id)
+  }
+
+  def notPlayer(currentId: UserId): Player = {
+    playerList
+      .find(_.id != currentId)
+      .head
+  }
+
+  def withCurrentPlayer(userId: UserId): Game = {
+    this.copy(currentPlayerId = userId)
   }
 }
+
+/**
+ * A game along with it's current calculated status
+ * @param game The game state result
+ * @param status The game status
+ */
+case class GameWithStatus(
+  game: Game,
+  status: GameStatus
+)

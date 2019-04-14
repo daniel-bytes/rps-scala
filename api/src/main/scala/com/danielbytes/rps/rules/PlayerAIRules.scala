@@ -1,4 +1,4 @@
-package com.danielbytes.rps.engine
+package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.model._
 
@@ -12,16 +12,16 @@ trait PlayerAIRules {
    * A player takes a turn in the game
    *
    * @param game The game state
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @return The computed move to make
    */
   def computeMove(
     game: Game,
-    playerId: PlayerId
+    userId: UserId
   ): Either[RuleViolationError, MoveResult] = {
     for {
-      moves <- computePossibleMoves(game, playerId)
-      move <- computeMove(game, playerId, moves)
+      moves <- computePossibleMoves(game, userId)
+      move <- computeMove(game, userId, moves)
     } yield move
   }
 
@@ -29,13 +29,13 @@ trait PlayerAIRules {
    * Computes the next AI move from all possible moves
    *
    * @param game The game state
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @param moves All possible moves
    * @return The computed move
    */
   private def computeMove(
     game: Game,
-    playerId: PlayerId,
+    userId: UserId,
     moves: Set[MoveResult]
   ): Either[RuleViolationError, MoveResult] = {
     moves.toList.sortBy {
@@ -54,16 +54,16 @@ trait PlayerAIRules {
    * Computes all possible moves a player can make
    *
    * @param game The game state
-   * @param playerId The player taking a turn
+   * @param userId The player taking a turn
    * @return All possible moves
    */
-  private[engine] def computePossibleMoves(
+  private[rules] def computePossibleMoves(
     game: Game,
-    playerId: PlayerId
+    userId: UserId
   ): Either[RuleViolationError, Set[MoveResult]] = {
     val movableTokens = game
       .board
-      .playerTokens(playerId)
+      .playerTokens(userId)
       .collect { case t if t.movable => t }
       .toSet
 
@@ -79,7 +79,7 @@ trait PlayerAIRules {
       }
       .map {
         case (from, to) =>
-          moveRules.moveToken(game, playerId, from, to)
+          moveRules.moveToken(game, userId, from, to)
       }
       .collect {
         case Right(result) => result
@@ -108,6 +108,7 @@ trait PlayerAIRules {
   }
 }
 
-object PlayerAIRulesEngine extends PlayerAIRules {
-  implicit def moveRules: MoveRules = MoveRulesEngine
-}
+class PlayerAIRulesEngine()(
+  implicit
+  val moveRules: MoveRules
+) extends PlayerAIRules {}
