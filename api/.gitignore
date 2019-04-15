@@ -17,3 +17,4 @@ target/
 .settings
 src/main/resources/build/
 src/main/resources/google-auth.json
+src/main/resources/secrets.json

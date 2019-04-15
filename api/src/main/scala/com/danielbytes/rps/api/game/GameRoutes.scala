@@ -8,9 +8,9 @@ import akka.http.scaladsl.server.directives.MethodDirectives.get
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.server.directives.PathDirectives.path
 import com.danielbytes.rps.api.session.ApplicationSessionDirectives
-import com.danielbytes.rps.helpers.{ DateTimeHelper, Helpers }
+import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.services.ApplicationServiceSyntax._
-import com.danielbytes.rps.model.{ GameId, GameInProgress, User }
+import com.danielbytes.rps.model.{ GameId, User }
 import com.danielbytes.rps.services.GameService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._

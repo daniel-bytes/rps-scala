@@ -9,7 +9,7 @@ export const App: React.SFC<Props> = (props) => {
   const sessionManager = new SessionManager(
     new GoogleAuthService({
       apiScriptUrl: "https://apis.google.com/js/api.js",
-      clientId: "391796029454-had3equ00f3qr29bu1hg5rrv927nr0h1.apps.googleusercontent.com",
+      clientId: "391796029454-blfdr00tme5fj3one35ke54h0q5rosgv.apps.googleusercontent.com",
       scope: "profile email",
       document: document,
       window: window

@@ -36,7 +36,7 @@ object ApplicationServer
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val config: ApplicationConfig = ApplicationConfig.instance
 
-  implicit val gameRepository: GameRepository = new InMemoryGameRepository()
+  implicit val gameRepository: GameRepository = new RedisGameRepository(config.redis)
 
   import ApplicationErrorHandler._
 
@@ -46,9 +46,9 @@ object ApplicationServer
       sessionRoutes
 
   val clientRouteLogged = DebuggingDirectives.logRequestResult("API", Logging.InfoLevel)(routes)
-  Http().bindAndHandle(clientRouteLogged, "localhost", 8080)
+  Http().bindAndHandle(clientRouteLogged, config.api.interface, config.api.port)
 
-  println(s"Server online at http://localhost:8080/")
+  println(s"Server online at http://${config.api.interface}:${config.api.port}/")
 
   Await.result(system.whenTerminated, Duration.Inf)
 }
