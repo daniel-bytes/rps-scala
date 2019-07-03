@@ -1,14 +1,71 @@
 import * as errors from '../errors/ApiError'
 import * as models from '../models/ApiModels'
 
-export default class ApiClient {
+/**
+ * An HTTP JSON REST client
+ */
+export interface IApiClient {
+  /**
+   * Executes an HTTP GET request and converts the JSON response to the specified type
+   * @param url The URL to request
+   */
+  getAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>>
+
+  /**
+   * Executes an HTTP GET request and converts the JSON response to the specified type,
+   * or null if a 404 is returned
+   * @param url The URL to request
+   */
+  maybeGetAsync<TRes>(url: string): Promise<models.ApiResponse<TRes | null>>
+
+  /**
+   * Executes a JSON HTTP POST request and converts the response to the specified type
+   * @param url The URL to request
+   * @param req The request body
+   */
+  postAsync<TRes>(
+    url: string, 
+    req: object
+  ): Promise<models.ApiResponse<TRes>> 
+
+  /**
+   * Executes a JSON HTTP PUT request and converts the response to the specified type
+   * @param url The URL to request
+   * @param req The request body
+   */
+  putAsync<TRes>(
+    url: string, 
+    req: object
+  ): Promise<models.ApiResponse<TRes>> 
+
+  /**
+   * Executes an HTTP DELETE request and converts the JSON response to the specified type
+   * @param url The URL to request
+   */
+  deleteAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>>
+}
+
+/**
+ * A factory for creating IApiClient instances from API tokens
+ */
+export interface IApiClientFactory {
+  /**
+   * Returns a new IApiClient instance
+   */
+  createApiClient(): IApiClient
+}
+
+/**
+ * Implementation of IApiClient.  Not exported, need to use ApiClientFactory to get an instance.
+ */
+export class ApiClient implements IApiClient {
   private readonly _token: string | null
 
   constructor(token: string | null = null) {
     this._token = token
   }
 
-  async getAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>> {
+  public async getAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>> {
     const response = await fetch(url, {
       method: `GET`,
       headers: this.getHeaders()
@@ -17,7 +74,7 @@ export default class ApiClient {
     return this.handleResponse<TRes>(response)
   }
 
-  async maybeGetAsync<TRes>(url: string): Promise<models.ApiResponse<TRes | null>> {
+  public async maybeGetAsync<TRes>(url: string): Promise<models.ApiResponse<TRes | null>> {
     const response = await fetch(url, {
       method: `GET`,
       headers: this.getHeaders()
@@ -38,7 +95,7 @@ export default class ApiClient {
     }
   }
 
-  async postAsync<TRes>(
+  public async postAsync<TRes>(
     url: string, 
     req: object
   ): Promise<models.ApiResponse<TRes>> 
@@ -52,7 +109,7 @@ export default class ApiClient {
     return this.handleResponse<TRes>(response)
   }
 
-  async putAsync<TRes>(
+  public async putAsync<TRes>(
     url: string, 
     req: object
   ): Promise<models.ApiResponse<TRes>> 
@@ -66,7 +123,7 @@ export default class ApiClient {
     return this.handleResponse<TRes>(response)
   }
 
-  async deleteAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>> {
+  public async deleteAsync<TRes>(url: string): Promise<models.ApiResponse<TRes>> {
     const response = await fetch(url, {
       method: `DELETE`,
       headers: this.getHeaders()
@@ -75,8 +132,7 @@ export default class ApiClient {
     return this.handleResponse<TRes>(response)
   }
 
-  private getHeaders(isJson: boolean = false): Headers 
-  {
+  private getHeaders(isJson: boolean = false): Headers {
     let headers: Headers = new Headers()
 
     if (this._token) {
@@ -103,18 +159,11 @@ export default class ApiClient {
       }
     }
 
-    let message: string
-
-    if (response.headers.get(`Content-Type`) === `application/json`) {
-      const err = await response.json()
-      message = err.message
-    } else {
-      message = await response.text()
-    }
+    const responseBody = await response.json()
 
     throw new errors.ApiError(
       response.status, 
-      message,
+      responseBody.code || 'unknown',
       new Map<string, string>(response.headers))
   }
 }

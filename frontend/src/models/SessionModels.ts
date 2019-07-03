@@ -1,4 +1,4 @@
-import { User } from "./UserModels";
+import { User } from "./UserModels"
 
 export interface GoogleTokenRequest {
   id: string

@@ -1,29 +1,26 @@
-import React, { Component } from 'react';
-import {GameOverview} from '../models/GameModels'
+import React, { Component } from 'react'
+import { observer, inject } from 'mobx-react'
+import { IApplicationStore } from '../services/ApplicationStore'
 
-interface Props { 
-  games: GameOverview[], 
-  gameSelected: (id: string) => void 
+interface Props {
+  applicationStore?: IApplicationStore
 }
-interface State {}
 
-export default class GameList extends Component<Props, State> {
+@inject("applicationStore")
+@observer
+export default class GameList extends Component<Props> {
   constructor(props: Props) {
     super(props)
     this.state = { ready: false }
-  }
-
-  gameClick(id: string) {
-    this.props.gameSelected(id)
   }
 
   render() {
     return (
       <div className="GameList">
         <ul>
-          {this.props.games.map(g =>
+          {this.props.applicationStore!.gamesOverview.games.map(g =>
             <li key={g.id}>
-              <button onClick={() => this.gameClick(g.id)}>
+              <button className="button" onClick={() => this.props.applicationStore!.playGameButtonPressedAsync(g.id)}>
               {g.isGameOver ? "Game Over" : "In Progress"}
               </button>
             </li>

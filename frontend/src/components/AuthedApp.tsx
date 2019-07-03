@@ -1,79 +1,42 @@
 import React, { Component } from 'react'
-import { GoogleAuthButton } from './GoogleAuthButton'
+import { observer, inject } from 'mobx-react'
+import { ActionButtons } from './ActionButtons'
 import { User } from '../models/UserModels'
-import SessionManager from '../services/SessionManager'
+import { ISessionService } from '../services/SessionService'
+import { IApplicationStore } from '../services/ApplicationStore'
 import GameApp from './GameApp'
-import GameService from '../services/GameService';
-
 
 interface Props {
-  sessionManager: SessionManager
+  sessionStore?: ISessionService
+  applicationStore?: IApplicationStore
 }
 
-interface State {
-  isReady: Boolean
-  isSignedIn: Boolean
-  user: User | null
-}
-
-export default class AuthedApp extends Component<Props, State> {
-  state: State = {
-    isReady: false,
-    isSignedIn: false,
-    user: null
-  }
-
-  async onSignInClick(evt: React.MouseEvent<HTMLElement>) {
-    const session = await this.props.sessionManager.requestGoogleTokenAsync()
-    
-    this.setState({
-      isReady: true,
-      isSignedIn: true,
-      user: session.user
-    })
-  }
-
-  onSignOutClick(evt: React.MouseEvent<HTMLElement>) {
-    this.props.sessionManager.clearSessionState()
-
-    this.setState({
-      isSignedIn: false,
-      user: null
-    })
-  }
+@inject('applicationStore')
+@observer
+export default class AuthedApp extends Component<Props> {
 
   async componentDidMount() {
-    await this.props.sessionManager.initialize()
-    const sessionState = await this.props.sessionManager.validateSessionAsync()
-    this.setState({ isReady: true })
+    await this.props.applicationStore!.initializeSessionStoreAsync()
+  }
 
-    if (sessionState) {
-      this.setState({ 
-        isSignedIn: true, 
-        user: sessionState.user
-      })
-    }
+  async onSignInClick() {
+    await this.props.applicationStore!.loginAsync()
+  }
+
+  onSignOutClick() {
+    this.props.applicationStore!.logout()
   }
 
   render() {
-    if (this.state.isReady) {
-      return <div>
-        <GoogleAuthButton 
-          isReady={ this.state.isReady }
-          isSignedIn={ this.state.isSignedIn }
-          onSignInClick={ this.onSignInClick.bind(this) }
-          onSignOutClick={ this.onSignOutClick.bind(this) }
-        />
+    if (this.props.applicationStore!.sessionInitialized) {
+      return <div className="container">
+        <h1 className="title">Rock/Paper/Scissor</h1>
+        <ActionButtons />
 
-        { this.state.user && this.state.isReady && 
-          <GameApp 
-            user={ this.state.user } 
-            gameService={ new GameService(this.props.sessionManager) }
-          />
-        }
+        { this.props.applicationStore!.loggedIn && <GameApp /> }
       </div>
     } else {
-      return <div>loading...</div>
+      return <div className="container">loading session...</div>
     }
   }
 }

@@ -1,44 +1,28 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+import { observer, inject } from 'mobx-react'
 import * as models from '../models/GameModels'
 import GameEngine from '../services/GameEngine'
-import GameService from '../services/GameService'
 import GameToken from './GameToken'
+import { IApplicationStore } from '../services/ApplicationStore'
 
 export interface GameBoardProps {
-  game: GameEngine
-  gameService: GameService
+  applicationStore?: IApplicationStore
 }
 
-export interface GameBoardState {
-  game: GameEngine
-  selectedToken: models.Token | undefined
-  targetPoints: models.Point[]
-}
-
-export default class GameBoard extends Component<GameBoardProps, GameBoardState> {
-  constructor(props: GameBoardProps) {
-    super(props)
-    this.state = { 
-      game: props.game, 
-      selectedToken: undefined,
-      targetPoints: []
-    }
-  }
+@inject("applicationStore")
+@observer
+export default class GameBoard extends Component<GameBoardProps> {
 
   get currentPlayerName(): string {
-    if (this.state.game.model.isPlayerTurn) {
-      return this.state.game.model.playerName
+    if (!this.props.applicationStore) throw new Error("missing applicationStore")
+
+    const game = this.props.applicationStore.game!
+
+    if (game.isPlayerTurn) {
+      return game.playerName
     } else {
-      return this.state.game.model.otherPlayerName
+      return game.otherPlayerName
     }
-  }
-
-  get currentGame(): GameEngine {
-    return this.state.game
-  }
-
-  get currentGameId(): string {
-    return this.currentGame.model.gameId
   }
 
   getTableRows(game: GameEngine): JSX.Element[] {
@@ -69,60 +53,36 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
   }
 
   onMouseDown(t: models.Token | undefined) {
-    if (!this.canMove()) return
-    let targets: models.Point[] = []
-
-    if (t) {
-      targets = this.currentGame.getTargetPoints(t.position)
-    }
-
-    this.setState({
-      selectedToken: t,
-      targetPoints: targets
-    })
+    if (!this.props.applicationStore) throw new Error("missing applicationStore")
+    this.props.applicationStore.gameBeginMoveToken(t)
   }
 
-  onMouseUp(t: models.Token | undefined, p: models.Point) {
-    if (!this.canMove()) return
-    if (!!this.state.selectedToken) {
-      const move = { from: this.state.selectedToken.position, to: p }
-
-      if (this.currentGame.isValidMove(move)) {
-        return this.props.gameService.gameMoveAsync(this.currentGameId, move).then(result => {
-          this.setState({
-            selectedToken: undefined,
-            targetPoints: [],
-            game: result
-          })
-        })
-      }
-    }
-    
-    this.setState({
-      selectedToken: undefined,
-      targetPoints: []
-    })
+  async onMouseUp(t: models.Token | undefined, p: models.Point) {
+    if (!this.props.applicationStore) throw new Error("missing applicationStore")
+    await this.props.applicationStore.gameMoveToPointAsync(p)
   }
 
   getHeader() {
-    if (this.currentGame) {
-      if (this.currentGame.model.isGameOver) {
-        return `Game Over: ${this.currentGame.model.winnerName} wins!`
-      }
+    const engine = this.props.applicationStore!.gameEngine!
 
-      if (this.currentGame.canMove) {
-        return `${this.currentPlayerName}'s Turn`
-      }
+    if (engine.model.isGameOver) {
+      return `Game Over: ${engine.model.winnerName} wins!`
+    }
+
+    if (engine.canMove()) {
+      return `${this.currentPlayerName}'s Turn`
     }
 
     return ''
   }
 
   getTableCell(game: GameEngine, r: number, c: number): JSX.Element {
+    if (!this.props.applicationStore) throw new Error("missing applicationStore")
+
     const token = game.getToken({ x: c, y: r})
-    const hasSelection = !!this.state.selectedToken
-    const isSelected = hasSelection && this.state.selectedToken === token
-    const isTarget = this.state.targetPoints.some(
+    const hasSelection = !!this.props.applicationStore.selectedToken
+    const isSelected = hasSelection && this.props.applicationStore.selectedToken === token
+    const isTarget = this.props.applicationStore.targetPoints.some(
       p => p.x === c && p.y === r
     )
 
@@ -139,27 +99,28 @@ export default class GameBoard extends Component<GameBoardProps, GameBoardState>
     )
   }
 
-  canMove(): boolean {
-    return this.currentGame.canMove()
-  }
-
   render() {
-    const rows = this.getTableRows(this.state.game)
+    if (!this.props.applicationStore) throw new Error("missing applicationStore")
+
+    const engine = this.props.applicationStore!.gameEngine!
+    const rows = this.getTableRows(engine)
 
     return (
-      <div className='Container'>
-        <header className='CanvasHeader'>
-          <h1>{this.getHeader()}</h1>
-        </header>
-        <section className='CanvasBody'>
-          <table className='CanvasTable'>
-            <tbody>
-              {rows}
-            </tbody>
-          </table>
-        </section>
-        <footer></footer>
-      </div>
-    );
+      <section className="hero">
+        <div className="hero-body">
+          <div className="container">
+            <h1 className="title">
+            {this.getHeader()}
+            </h1>
+          
+            <table className='CanvasTable table is-bordered is-fullwidth'>
+              <tbody>
+                {rows}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    )
   }
 }

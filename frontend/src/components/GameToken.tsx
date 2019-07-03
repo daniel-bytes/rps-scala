@@ -1,4 +1,4 @@
-import React, { Component, MouseEventHandler } from 'react';
+import React, { Component, MouseEventHandler } from 'react'
 import * as models from '../models/GameModels'
 
 export interface GameTokenProps {

@@ -40,6 +40,9 @@ case class Game(
 ) {
   val playerList = List(player1, player2)
 
+  // players that are not AI
+  lazy val userList = playerList.filterNot(_.isAI)
+
   if (!playerList.exists(_.id == currentPlayerId)) {
     throw new IllegalStateException(s"Invalid currentPlayerId [$currentPlayerId]")
   }

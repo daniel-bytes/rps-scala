@@ -1,70 +1,49 @@
-import SessionManager from './SessionManager'
-import GameEngine from './GameEngine'
-import * as models from '../models/GameModels'
+import { IApiClientFactory } from "./ApiClient"
+import * as models from "../models/GameModels"
+import { ApiError } from "../errors/ApiError"
 
-export default class GameService {
-  private readonly _session: SessionManager
 
-  constructor(
-    session: SessionManager
-  ) {
-    this._session = session
+export interface IGameService {
+  listGamesAsync(): Promise<models.GamesOverview>
+  loadGameAsync(id: string): Promise<models.Game | null>
+  gameMoveAsync(id: string, move: models.Move): Promise<models.Game>
+  createGameAsync(): Promise<models.Game>
+  deleteGameAsync(id: string): Promise<void>
+}
+
+export class GameService implements IGameService {
+  private readonly _apiClientFactory: IApiClientFactory
+
+  constructor(apiClientFactory: IApiClientFactory) {
+    this._apiClientFactory = apiClientFactory
   }
 
-  getCurrentGameId(): string | null {
-    return this._session.getGameId()
-  }
-
-  setCurrentGameId(id: string | null) {
-    return this._session.setGameId(id)
-  }
-
-  async listGamesAsync(): Promise<models.GamesOverview> {
+  public async listGamesAsync(): Promise<models.GamesOverview> {
     const response = await this.api.getAsync<models.GamesOverview>(this.rootUrl)
-    console.log(`GameService#listGamesAsync ${JSON.stringify(response)}`)
-
     return response.body
   }
 
-  async loadGameAsync(id: string): Promise<GameEngine | null> {
+  public async loadGameAsync(id: string): Promise<models.Game | null> {
     const response = await this.api.maybeGetAsync<models.Game>(this.gameUrl(id))
-    console.log(`GameService#loadGameAsync(${id}) ${JSON.stringify(response)}`)
-
-    if (response.body) {
-      this._session.setGameId(id)
-      return new GameEngine(response.body)
-    } else {
-      this._session.setGameId(null)
-      return null
-    }
+    return response.body
   }
 
-  async gameMoveAsync(id: string, move: models.Move): Promise<GameEngine> {
+  public async gameMoveAsync(id: string, move: models.Move): Promise<models.Game> {
     const response = await this.api.postAsync<models.Game>(this.moveUrl(id), move)
-    console.log(`GameService#gameMoveAsync(${id}, ${JSON.stringify(move)}) ${JSON.stringify(response)}`)
-
-    this._session.setGameId(response.body.gameId)
-    return new GameEngine(response.body)
+    return response.body
   }
 
-  async createGameAsync(): Promise<GameEngine> {
+  public async createGameAsync(): Promise<models.Game> {
     const response = await this.api.postAsync<models.Game>(this.rootUrl, {})
-    console.log(`GameService#createGameAsync ${JSON.stringify(response)}`)
-
-    this._session.setGameId(response.body.gameId)
-    return new GameEngine(response.body)
+    return response.body
   }
 
-  async deleteGameAsync(id: string): Promise<GameEngine> {
-    const response = await this.api.deleteAsync<models.Game>(this.gameUrl(id))
-    console.log(`GameService#deleteGameAsync(${id}) ${JSON.stringify(response)}`)
-
-    this._session.setGameId(null)
-    return new GameEngine(response.body)
+  public async deleteGameAsync(id: string): Promise<void> {
+    await this.api.deleteAsync<models.Game>(this.gameUrl(id))
   }
 
   private get api() {
-    return this._session.getApiClient()
+    return this._apiClientFactory.createApiClient()
   }
 
   private get rootUrl() { return '/games' }

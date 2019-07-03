@@ -1,12 +1,36 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { configure } from "mobx"
+import { Provider } from 'mobx-react'
+import './index.css'
+import App from './App'
+import { GoogleAuthService } from './services/GoogleAuthService'
+import { SessionService } from './services/SessionService'
+import { GameService } from './services/GameService'
+import { ApplicationStore} from './services/ApplicationStore'
 
-ReactDOM.render(<App />, document.getElementById('root'));
+configure({ enforceActions: 'observed' })
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: http://bit.ly/CRA-PWA
-serviceWorker.unregister();
+// create service/store instances
+const sessionStore = new SessionService(
+  new GoogleAuthService({
+    apiScriptUrl: "https://apis.google.com/js/api.js",
+    clientId: "391796029454-blfdr00tme5fj3one35ke54h0q5rosgv.apps.googleusercontent.com",
+    scope: "profile email",
+    document: document,
+    window: window
+  })
+)
+
+const gameStore = new GameService(sessionStore)
+
+const stores = {
+  applicationStore: new ApplicationStore(gameStore, sessionStore)
+}
+
+ReactDOM.render(
+  <Provider {...stores}>
+    <App />
+  </Provider>, 
+  document.getElementById('root')
+)

@@ -78,3 +78,8 @@ case class BoardTokenCountException(
   s"Illegal token count for game board token count: $rows rows, $columns columns, " +
     s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
 )
+
+/**
+ * Serialization / Deserialization failed
+ */
+case class SerializationException(msg: String) extends IllegalStateException(msg)
