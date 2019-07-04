@@ -8,6 +8,7 @@ import { ApiError } from '../errors/ApiError'
 
 export interface IApplicationStore {
   readonly apiError: string | null
+  readonly subtitle: string | null
   readonly isLoading: boolean
   readonly sessionInitialized: boolean
   readonly loggedIn: boolean
@@ -15,7 +16,6 @@ export interface IApplicationStore {
   readonly navState: NavigationState
 
   readonly game: models.Game | null
-  readonly gamesOverview: models.GamesOverview
   readonly gameEngine: GameEngine | null
 
   readonly selectedToken: models.Token | undefined
@@ -34,9 +34,6 @@ export interface IApplicationStore {
 
   
   // Nav buttons
-  homeButtonPressedAsync(): Promise<IApplicationStore>
-  playGameButtonPressedAsync(id: string): Promise<IApplicationStore>
-  startGameButtonPressedAsync(): Promise<IApplicationStore>
   endGameButtonPressedAsync(): Promise<IApplicationStore>
   signInButtonPressedAsync(): Promise<IApplicationStore>
   signOutButtonPressedAsync(): Promise<IApplicationStore>
@@ -69,14 +66,26 @@ export class ApplicationStore implements IApplicationStore {
   @observable 
   public game: models.Game | null = null
 
-  @observable 
-  public gamesOverview: models.GamesOverview = { games: [] }
-
   @observable
   public sessionInitialized: boolean = false
 
   @observable
   public loggedIn: boolean = false
+
+  @computed
+  public get subtitle(): string | null {
+    if (this.loggedIn) {
+      if (this.game) {
+        if (this.game.isGameOver) {
+          return `Game Over: ${this.game.winnerName} wins!`
+        } else if (this.game.isPlayerTurn) {
+          return "Your Turn"
+        }
+      }
+    }
+
+    return ""
+  }
 
   @computed
   public get gameInProgress(): boolean {
@@ -152,19 +161,34 @@ export class ApplicationStore implements IApplicationStore {
     await this.apiAction(async () => {
       const overview = await this._gameStore.listGamesAsync()
 
-      runInAction(() => {
-        this.gamesOverview = overview
-      })
-
+      let game: models.Game | null = null
       const sessionState = this._sessionStore.getSessionState()
 
+      // load game from session
       if (sessionState && sessionState.gameId) {
-        const game = await this._gameStore.loadGameAsync(sessionState.gameId)
-
-        runInAction(() => {
-          this.game = game
-        })
+        game = await this._gameStore.loadGameAsync(sessionState.gameId)
       }
+
+      if (!game) {
+        // load game from overview
+        for (let i = 0; i < overview.games.length; i++) {
+          game = await this._gameStore.loadGameAsync(overview.games[i].id)
+          if (game) break
+        }
+      }
+
+      if (!game) {
+        // create a new game
+        game = await this._gameStore.createGameAsync()
+      }
+
+      runInAction(() => {
+        this.game = game
+        
+        if (game) {
+          this.setGameInSession(game)
+        }
+      })
     })
 
     return this
@@ -210,51 +234,15 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @action.bound
-  public async homeButtonPressedAsync(): Promise<IApplicationStore> {
-    const gamesOverview = await this._gameStore.listGamesAsync()
-
-    runInAction(() => {
-      this.clearGameFromSession()
-      this.gamesOverview = gamesOverview
-    })
-
-    return this
-  }
-
-  @action.bound
-  public async playGameButtonPressedAsync(id: string): Promise<IApplicationStore> {
-    await this.apiAction(async () => {
-      const game = await this._gameStore.loadGameAsync(id)
-
-      runInAction(() => {
-        this.setGameInSession(game!)
-      })
-    })
-    return this
-  }
-
-  @action.bound
-  public async startGameButtonPressedAsync(): Promise<IApplicationStore> {
-    await this.apiAction(async () => {
-      const game = await this._gameStore.createGameAsync()
-
-      runInAction(() => {
-        this.setGameInSession(game)
-      })
-    })
-    return this
-  }
-
-  @action.bound
   public async endGameButtonPressedAsync(): Promise<IApplicationStore> {
     await this.apiAction(async () => {
       await this._gameStore.deleteGameAsync(this.game!.gameId)
-      const gamesOverview = await this._gameStore.listGamesAsync()
 
       runInAction(() => {
         this.clearGameFromSession()
-        this.gamesOverview = gamesOverview
       })
+
+      await this.initializeGameAppAsync()
     })
     return this
   }

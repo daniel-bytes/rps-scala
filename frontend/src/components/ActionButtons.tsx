@@ -13,36 +13,22 @@ export const ActionButtons: React.SFC<Props> = inject("applicationStore")(observ
 
   const loginStyle = props.applicationStore.navState === NavigationState.LoginPage ? 'block' : 'none'
   const logoutStyle = props.applicationStore.navState !== NavigationState.LoginPage ? 'block' : 'none'
-  const newGameStyle = props.applicationStore.navState === NavigationState.ListGamesPage ? 'block' : 'none'
-  const listGamesStyle = props.applicationStore.navState === NavigationState.PlayGamePage ? 'block' : 'none'
   const endGameStyle = props.applicationStore.navState === NavigationState.PlayGamePage ? 'block' : 'none'
 
   return (
-    <div>
-      <button 
-        className="button"
-        id="list_games_button" 
-        style={{ display: listGamesStyle }}
-        onClick={ props.applicationStore.homeButtonPressedAsync }>Home</button>
-
-      <button 
-        className="button"
-        id="create_game_button" 
-        style={{ display: newGameStyle }}
-        onClick={ props.applicationStore.startGameButtonPressedAsync }>Start a Game</button>
-
+    <div className="buttons has-addons is-right">
       <button 
         className="button"
         id="end_game_button" 
         style={{ display: endGameStyle }}
-        onClick={ props.applicationStore.endGameButtonPressedAsync }>End Game</button>
-
+        onClick={ props.applicationStore.endGameButtonPressedAsync }>Start New Game</button>
+    
       <button 
         className="button"
         id="authorize_button" 
         style={{ display: loginStyle }}
         onClick={ props.applicationStore.signInButtonPressedAsync }>Sign In With Your Google Account</button>
-
+    
       <button 
         className="button"
         id="signout_button" 
