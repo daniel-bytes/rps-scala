@@ -17,6 +17,7 @@ export default class GameToken extends Component<GameTokenProps> {
     let cssClass = 'canvas-table-cell'
     
     const isTarget = this.props.applicationStore!.targetPoints.some(p => GameEngine.pointsEqual(p, this.props.point))
+    
     const hasTargets = this.props.token && 
       GameEngine.isMovableTokenType(this.props.token) && 
       this.props.applicationStore!.gameEngine!.getTargetPoints(this.props.point).length > 0

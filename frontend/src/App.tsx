@@ -34,19 +34,19 @@ export default class App extends Component<Props> {
   private renderApp() {
     return (
       <div className="container">
-        <div className="two-thirds-item">
+        <div className="two-thirds-row">
           <h1 className="title">Rock/Paper/Scissor</h1>
         </div>
-        <div className="third-item">
+        <div className="one-third-row">
           <ActionButtons />
         </div>
-        <div className="half-item">
+        <div className="half-row">
           { this.props.applicationStore!.subtitle }
         </div>
-        <div className="half-item">
+        <div className="half-row">
           <ErrorBox />
         </div>
-        <div className="row">
+        <div className="full-row">
           { this.props.applicationStore!.loggedIn && <GameApp /> }
         </div>
       </div>

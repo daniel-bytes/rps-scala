@@ -9,32 +9,22 @@ body {
   justify-content: space-between;
 }
 
-.half-item {
-  width: 48%;
-  margin-bottom: 2%;
-}
-
-.quarter-item {
-  width: 24%;
-  margin-bottom: 2%;
-}
-
-.three-quarter-item {
-  width: 74%;
-  margin-bottom: 2%;
-}
-
-.third-item {
+.one-third-row {
   width: 33%;
   margin-bottom: 2%;
 }
 
-.two-thirds-item {
+.two-thirds-row {
   width: 66%;
   margin-bottom: 2%;
 }
 
-.row {
+.half-row {
+  width: 48%;
+  margin-bottom: 2%;
+}
+
+.full-row {
   width: 100%;
   margin-bottom: 2%;
 }
