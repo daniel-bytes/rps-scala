@@ -24,3 +24,11 @@ When two tokens collide, combat begins:
 - If a player runs out of movable tokens, the other player wins
 
 
+Running Locally
+---------------
+Requires an active Redis instance.  For local development, you can use Docker:
+
+```
+docker run --name redis-rps -d -p 6379:6379 redis
+```
+

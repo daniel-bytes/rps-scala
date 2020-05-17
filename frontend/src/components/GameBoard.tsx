@@ -34,53 +34,54 @@ export default class GameBoard extends Component<GameBoardProps> {
     }
 
     return (
-      <tr className='CanvasTableRow' key={`row:${r}`}>
+      <tr className='canvas-table-row' key={`row:${r}`}>
         {cells}
       </tr>
     )
   }
 
-  onMouseDown(t: models.Token | undefined) {
-    this.props.applicationStore!.gameBeginMoveToken(t)
-  }
-
-  async onMouseUp(t: models.Token | undefined, p: models.Point) {
-    await this.props.applicationStore!.gameMoveToPointAsync(p)
+  async onMouseDown(t: models.Token | undefined, p: models.Point) {
+    await this.props.applicationStore!.gameTrySelectTokenAsync(t, p)
   }
 
   getTableCell(game: GameEngine, r: number, c: number): JSX.Element {
-    const token = game.getToken({ x: c, y: r})
-    const hasSelection = !!this.props.applicationStore!.selectedToken
-    const isSelected = hasSelection && this.props.applicationStore!.selectedToken === token
+    const store = this.props.applicationStore!
+
+    let isSelected = false
+    const point = { x: c, y: r }
+    const token = game.getToken(point)
+    const hasSelection = !!store.selectedToken
+                        
     const isTarget = this.props.applicationStore!.targetPoints.some(
-      p => p.x === c && p.y === r
+      p => GameEngine.pointsEqual(point, p)
     )
+
+    if (hasSelection && store.selectedToken && token) {
+      isSelected = GameEngine.pointsEqual(store.selectedToken.position, token.position)
+    }
 
     return (
       <GameToken
-        x={c}
-        y={r}
+        point={point}
         key={`GameToken:${r}:${c}`}
         isSelected={isSelected}
         isTarget={hasSelection && isTarget}
         token={token}
-        onMouseDown={this.onMouseDown.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)} />
+        applicationStore={this.props.applicationStore}
+        onMouseDown={this.onMouseDown.bind(this)} />
     )
   }
 
   render() {
     const engine = this.props.applicationStore!.gameEngine!
     const rows = this.getTableRows(engine)
-
+    
     return (
-      <div className="container">
-        <table className='CanvasTable table is-bordered is-fullwidth'>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
-      </div>
+      <table className='canvas-table'>
+        <tbody>
+          {rows}
+        </tbody>
+      </table>
     )
   }
 }

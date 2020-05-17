@@ -33,25 +33,23 @@ export default class App extends Component<Props> {
 
   private renderApp() {
     return (
-      <section className="section">
-        <div className="container is-fluid">
-          <div className='columns'>
-            <div className='column'>
-              <h1 className="title">Rock/Paper/Scissor</h1>
-            </div>
-            <div className='column'>
-              <h3 className="subtitle is-3 center">
-                { this.props.applicationStore!.subtitle }
-              </h3>
-            </div>
-            <div className='column'>
-              <ActionButtons />
-            </div>
-          </div>
+      <div className="container">
+        <div className="two-thirds-item">
+          <h1 className="title">Rock/Paper/Scissor</h1>
+        </div>
+        <div className="third-item">
+          <ActionButtons />
+        </div>
+        <div className="half-item">
+          { this.props.applicationStore!.subtitle }
+        </div>
+        <div className="half-item">
           <ErrorBox />
+        </div>
+        <div className="row">
           { this.props.applicationStore!.loggedIn && <GameApp /> }
         </div>
-      </section>
+      </div>
     )
   }
 

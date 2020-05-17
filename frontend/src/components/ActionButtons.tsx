@@ -11,23 +11,23 @@ interface Props {
 export const ActionButtons: React.SFC<Props> = inject("applicationStore")(observer((props) => {
   if (!props.applicationStore) throw new Error("Missing applicationStore")
 
-  const loginStyle = props.applicationStore.navState === NavigationState.LoginPage ? 'block' : 'none'
-  const logoutStyle = props.applicationStore.navState !== NavigationState.LoginPage ? 'block' : 'none'
-  const endGameStyle = props.applicationStore.navState === NavigationState.PlayGamePage ? 'block' : 'none'
+  const loginStyle = props.applicationStore.navState === NavigationState.LoginPage ? 'inline' : 'none'
+  const logoutStyle = props.applicationStore.navState !== NavigationState.LoginPage ? 'inline' : 'none'
+  const endGameStyle = props.applicationStore.navState === NavigationState.PlayGamePage ? 'inline' : 'none'
 
   return (
-    <div className="buttons has-addons is-right">
+    <div className="buttons">
       <button 
         className="button"
         id="end_game_button" 
         style={{ display: endGameStyle }}
-        onClick={ props.applicationStore.endGameButtonPressedAsync }>Start New Game</button>
+        onClick={ props.applicationStore.endGameButtonPressedAsync }>New Game</button>
     
       <button 
         className="button"
         id="authorize_button" 
         style={{ display: loginStyle }}
-        onClick={ props.applicationStore.signInButtonPressedAsync }>Sign In With Your Google Account</button>
+        onClick={ props.applicationStore.signInButtonPressedAsync }>Sign In With Google To Play</button>
     
       <button 
         className="button"

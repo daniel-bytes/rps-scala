@@ -1,30 +1,36 @@
 import React, { Component, MouseEventHandler } from 'react'
 import * as models from '../models/GameModels'
+import { IApplicationStore } from '../services/ApplicationStore'
+import GameEngine from '../services/GameEngine'
 
 export interface GameTokenProps {
-  x: number
-  y: number
+  point: models.Point
   isSelected: boolean
   isTarget: boolean
   token: models.Token | undefined
-  onMouseDown: (t: models.Token | undefined) => void
-  onMouseUp: (t: models.Token | undefined, p: models.Point) => void
+  applicationStore?: IApplicationStore
+  onMouseDown: (t: models.Token | undefined, p: models.Point) => void
 }
 
 export default class GameToken extends Component<GameTokenProps> {
   getCssClass(): string {
-    let cssClass = 'CanvasTableCell'
+    let cssClass = 'canvas-table-cell'
     
-    if (this.isPlayerOwned) {
-      cssClass += ' PlayerCell'
+    const isTarget = this.props.applicationStore!.targetPoints.some(p => GameEngine.pointsEqual(p, this.props.point))
+    const hasTargets = this.props.token && 
+      GameEngine.isMovableTokenType(this.props.token) && 
+      this.props.applicationStore!.gameEngine!.getTargetPoints(this.props.point).length > 0
+
+    if (isTarget || hasTargets) {
+      cssClass += ' cell-movable'
     }
 
     if (this.props.isSelected) {
-      cssClass += ' SelectedCell'
+      cssClass += ' selected-cell'
     }
 
     if (this.props.isTarget) {
-      cssClass += ' TargetCell'
+      cssClass += ' target-cell'
     }
 
     return cssClass
@@ -33,8 +39,8 @@ export default class GameToken extends Component<GameTokenProps> {
   getTokenType(): string {
     if (this.props.token) {
       switch (this.props.token.tokenType) {
-        case 'other': return 'Player 2'
-        default: return this.props.token.tokenType
+        case models.TokenType.other: return 'Player 2'
+        default: return this.props.token.tokenType.toString()
       }
     }
 
@@ -42,14 +48,8 @@ export default class GameToken extends Component<GameTokenProps> {
   }
 
   onMouseDown() {
-    if (this.isPlayerOwned && this.props.onMouseDown) {
-      this.props.onMouseDown(this.props.token)
-    }
-  }
-
-  onMouseUp() {
-    if (this.props.onMouseUp) {
-      this.props.onMouseUp(this.props.token, this.point)
+    if (this.props.onMouseDown) {
+      this.props.onMouseDown(this.props.token, this.props.point)
     }
   }
   
@@ -58,7 +58,6 @@ export default class GameToken extends Component<GameTokenProps> {
       <td 
         className={this.getCssClass()} 
         onMouseDown={this.onMouseDown.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)}
       >
         {this.getTokenType()}
       </td>
@@ -70,6 +69,6 @@ export default class GameToken extends Component<GameTokenProps> {
   }
 
   get point(): models.Point {
-    return { x: this.props.x, y: this.props.y }
+    return this.props.point
   }
 }

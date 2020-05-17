@@ -14,17 +14,17 @@ export interface Move {
 }
 
 export enum TokenType {
-  rock,
-  paper,
-  scissor,
-  bomb,
-  flag,
-  other
+  rock = "rock",
+  paper = "paper",
+  scissor = "scissor",
+  bomb = "bomb",
+  flag = "flag",
+  other = "other"
 }
 
 export interface Token {
   position: Point
-  tokenType: string
+  tokenType: TokenType
   playerOwned: boolean
 }
 

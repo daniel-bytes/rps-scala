@@ -29,7 +29,7 @@ export interface IApplicationStore {
 
   // Game app
   initializeGameAppAsync(): Promise<IApplicationStore>
-  gameBeginMoveToken(token: models.Token | undefined): void
+  gameTrySelectTokenAsync(token: models.Token | undefined, point: models.Point): Promise<IApplicationStore>
   gameMoveToPointAsync(point: models.Point): Promise<IApplicationStore>
 
   
@@ -195,19 +195,28 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @action.bound
-  public gameBeginMoveToken(token: models.Token | undefined): void {
+  public gameTrySelectTokenAsync(token: models.Token | undefined, point: models.Point): Promise<IApplicationStore> {
     const engine = this.gameEngine!
 
     if (engine.canMove()) {
-      let targets: models.Point[] = []
-
-      if (token) {
-        targets = engine.getTargetPoints(token.position)
+      if (this.selectedToken && GameEngine.pointsEqual(point, this.selectedToken.position)) {
+        this.selectedToken = undefined;
+        this.targetPoints = [];
+        return new Promise(r => r(this));
       }
 
-      this.selectedToken = token
-      this.targetPoints = targets
+      if (token && token.playerOwned && engine.canMoveToken(token)) {
+        this.selectedToken = token
+        this.targetPoints = engine.getTargetPoints(token.position)
+        return new Promise(r => r(this));
+      }
+
+      if (this.selectedToken) {
+        return this.gameMoveToPointAsync(point)
+      }
     }
+
+    return new Promise(r => r(this));
   }
 
   @action.bound

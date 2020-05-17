@@ -51,7 +51,21 @@ export default class GameEngine {
     }, Array<models.Point>())
   }
 
+  canMoveToken(t: models.Token): boolean {
+    return GameEngine.isMovableTokenType(t) && this.getTargetPoints(t.position).length > 0
+  }
+
   getToken(p: models.Point): models.Token | undefined {
     return this.model.tokens.find(t => t.position.x === p.x && t.position.y === p.y)
+  }
+
+  static isMovableTokenType(t: models.Token): boolean {
+    return t.tokenType === models.TokenType.rock ||
+      t.tokenType === models.TokenType.paper ||
+      t.tokenType === models.TokenType.scissor
+  }
+
+  static pointsEqual(lhs: models.Point, rhs: models.Point): boolean {
+    return lhs.x === rhs.x && lhs.y === rhs.y
   }
 }
