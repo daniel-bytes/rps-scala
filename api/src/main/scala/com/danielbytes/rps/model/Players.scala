@@ -15,17 +15,15 @@ case class Player(
 }
 
 object Player {
-  def ai(
-    position: StartPosition = StartPositionTop
-  ): Player = Player(
+  def ai(position: StartPosition): Player = Player(
     User.ai(),
     position
   )
 
-  def native(
+  def player(
     userId: UserId,
     userName: UserName,
-    position: StartPosition = StartPositionTop
+    position: StartPosition
   ): Player = Player(
     User.native(userId, userName),
     position

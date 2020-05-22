@@ -4,6 +4,7 @@ import { IApplicationStore } from '../services/ApplicationStore'
 import GameEngine from '../services/GameEngine'
 
 export interface GameTokenProps {
+  id: string
   point: models.Point
   isSelected: boolean
   isTarget: boolean
@@ -57,6 +58,7 @@ export default class GameToken extends Component<GameTokenProps> {
   render() {
     return (
       <td 
+        id={this.props.id}
         className={this.getCssClass()} 
         onMouseDown={this.onMouseDown.bind(this)}
       >

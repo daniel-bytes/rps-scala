@@ -32,13 +32,12 @@ export default class App extends Component<Props> {
   }
 
   private renderApp() {
-    const combat = this.props.applicationStore!.combat.map(c => 
-      <div>{ c }</div>
-    )
+    const combat = this.props.applicationStore!.combat.map(c => <div>{ c }</div>)
+
     return (
       <div className="container">
         <div className="two-thirds-row">
-          <h1 className="title">Rock/Paper/Scissor</h1>
+          <h2 className="title">Rock/Paper/Scissor</h2>
         </div>
         <div className="one-third-row">
           <ActionButtons />

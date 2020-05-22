@@ -116,8 +116,8 @@ trait MoveRules {
 
   /**
    * Calculates the direction a token was moved
-   * @param game The current game state
    * @param from The point to move from
+   * @param to The point to move to
    * @param player The player moving the token
    * @return The move direction or an error
    */
@@ -129,10 +129,10 @@ trait MoveRules {
     (from.x - to.x, from.y - to.y, player.position) match {
       case (-1, 0, _) => Right(MoveRight)
       case (1, 0, _) => Right(MoveLeft)
-      case (0, -1, StartPositionTop) => Right(MoveReverse)
+      case (0, -1, StartPositionTop) => Right(MoveBackward)
       case (0, -1, StartPositionBottom) => Right(MoveForward)
       case (0, 1, StartPositionTop) => Right(MoveForward)
-      case (0, 1, StartPositionBottom) => Right(MoveReverse)
+      case (0, 1, StartPositionBottom) => Right(MoveBackward)
       case _ => Left(MoveIsTooFarError)
     }
   }

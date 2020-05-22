@@ -33,13 +33,13 @@ trait BoardRules {
   private def generateRandomBoard(
     player1: Player,
     player2: Player,
-    flagCount: Int = 1,
     bombCount: Int = 2,
     rows: Int = 6,
     columns: Int = 6,
-    playerRows: Int = 2,
-    ensureFlagIsAtBottom: Boolean = true
+    playerRows: Int = 2
   ): Board = {
+    val flagCount: Int = 1
+
     if (playerRows < 1 || columns < 6 || rows < (playerRows * 2)) {
       throw BoardGeometryException(rows, columns)
     }
@@ -50,7 +50,7 @@ trait BoardRules {
     val paperCount = movableCount / 3
     val scissorCount = movableCount - rockCount - paperCount
 
-    if (flagCount < 1 || paperCount != scissorCount || (tokenCount - flagCount - bombCount - rockCount - paperCount - scissorCount) != 0) {
+    if (paperCount != scissorCount || (tokenCount - flagCount - bombCount - rockCount - paperCount - scissorCount) != 0) {
       throw BoardTokenCountException(rows, columns, flagCount, bombCount, rockCount, paperCount, scissorCount)
     }
 
@@ -66,7 +66,7 @@ trait BoardRules {
           generateTokensForType(scissorCount, Scissor)
       )
 
-      if (ensureFlagIsAtBottom && tokens.indexOf(Flag) > tokens.size / 2) {
+      if (tokens.indexOf(Flag) > tokens.size / 2) {
         generateTokenTypes()
       } else {
         tokens
@@ -78,9 +78,9 @@ trait BoardRules {
         case (tokenType, idx) => {
           val point = player.position match {
             case StartPositionBottom =>
-              Point(idx / columns, idx % columns)
+              Point(idx % columns, idx / columns)
             case StartPositionTop =>
-              Point(rows - (idx / columns) - 1, idx % columns)
+              Point(idx % columns, rows - 1 - (idx / columns))
           }
 
           point -> Token(player.id, tokenType)

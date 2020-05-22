@@ -90,7 +90,7 @@ export class ApplicationStore implements IApplicationStore {
 
   @computed
   public get combat(): string[] {
-    if (this.game) {
+    if (this.loggedIn && this.game) {
       const g = this.game 
 
       return g.recentMoves.reduce<string[]>((prev, cur) => {
@@ -299,14 +299,16 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @action.bound
-  public signOutButtonPressedAsync(): Promise<IApplicationStore> {
-    return new Promise((resolve) => {
+  public async signOutButtonPressedAsync(): Promise<IApplicationStore> {
+    await this.apiAction(async () => {
+      await this._gameStore.deleteGameAsync(this.game!.gameId)
+      
       runInAction(() => {
         this._sessionStore.clearSessionState()
         this.loggedIn = false
       })
-      return resolve(this)
     })
+    return this
   }
 
   private clearGameFromSession(): void {

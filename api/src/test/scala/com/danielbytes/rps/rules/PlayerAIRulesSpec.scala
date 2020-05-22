@@ -1,7 +1,7 @@
 package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.GameTestData
-import com.danielbytes.rps.helpers.Helpers
+import com.danielbytes.rps.helpers.{ Helpers, RandomHelper }
 import com.danielbytes.rps.model._
 import org.scalatest._
 
@@ -12,7 +12,10 @@ class PlayerAIRulesSpec
     with GameTestData
     with Helpers {
   val moveRules: MoveRules = new MoveRules {}
-  def withJitter(value: Double): Double = value
+
+  override def random: RandomHelper = new RandomHelper {
+    override def nextDouble(): Double = 1.0 / jitterFactor
+  }
 
   "PlayerAIRules" should {
     "handle computeMove rules" should {

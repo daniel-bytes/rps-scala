@@ -1,6 +1,6 @@
 package com.danielbytes.rps.helpers
 
 trait Helpers {
-  implicit lazy val random: RandomHelper = new RandomHelper {}
-  implicit lazy val dateTime: DateTimeHelper = new DateTimeHelper {}
+  def random: RandomHelper = new RandomHelper {}
+  def dateTime: DateTimeHelper = new DateTimeHelper {}
 }

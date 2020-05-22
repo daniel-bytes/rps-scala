@@ -9,9 +9,9 @@ trait GameTestData {
   val gid = GameId("Game1")
   val gid2 = GameId("Game2")
   val pid1 = UserId("p1")
-  val p1 = Player.native(pid1, UserName("Player 1"), StartPositionBottom)
+  val p1 = Player.player(pid1, UserName("Player 1"), StartPositionBottom)
   val pid2 = UserId("p2")
-  val p2 = Player.native(pid2, UserName("Player 2"), StartPositionTop)
+  val p2 = Player.player(pid2, UserName("Player 2"), StartPositionTop)
 
   val game = Game(
     gid,

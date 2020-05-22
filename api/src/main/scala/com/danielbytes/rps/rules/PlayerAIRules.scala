@@ -1,8 +1,7 @@
 package com.danielbytes.rps.rules
 
+import com.danielbytes.rps.helpers.RandomHelper
 import com.danielbytes.rps.model._
-
-import scala.util.{ Random, Try }
 
 /**
  * Trait that defines the computer player's AI rules.
@@ -14,9 +13,14 @@ trait PlayerAIRules {
   def moveRules: MoveRules
 
   /**
-   * Takes an input value and applies random jitter
+   * Random utility helper
    */
-  def withJitter(value: Double): Double
+  def random: RandomHelper
+
+  /**
+   * Max jitter factor
+   */
+  final val jitterFactor: Double = 2.0
 
   /**
    * A player takes a turn in the game
@@ -118,8 +122,11 @@ trait PlayerAIRules {
       point -> point.copy(y = point.y - 1)
     ).filter(pts => geometry.contains(pts._2))
   }
+
+  private def withJitter(value: Double): Double = (random.nextDouble() * jitterFactor) * value
 }
 
-class PlayerAIRulesEngine(val moveRules: MoveRules) extends PlayerAIRules {
-  def withJitter(value: Double): Double = (Random.nextDouble() * 2.0) * value
-}
+class PlayerAIRulesEngine(
+  val moveRules: MoveRules,
+  val random: RandomHelper
+) extends PlayerAIRules {}

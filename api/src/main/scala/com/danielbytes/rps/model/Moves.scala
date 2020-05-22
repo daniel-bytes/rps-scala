@@ -2,7 +2,7 @@ package com.danielbytes.rps.model
 
 sealed trait MoveDirection
 case object MoveForward extends MoveDirection
-case object MoveReverse extends MoveDirection
+case object MoveBackward extends MoveDirection
 case object MoveLeft extends MoveDirection
 case object MoveRight extends MoveDirection
 

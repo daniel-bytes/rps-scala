@@ -33,15 +33,13 @@ export default class GameBoard extends Component<GameBoardProps> {
       cells.push(this.getTableCell(game, r, c))
     }
 
+    const id = `canvas-table-row:${r}`
+
     return (
-      <tr className='canvas-table-row' key={`row:${r}`}>
+      <tr className='canvas-table-row' key={id} id={id}>
         {cells}
       </tr>
     )
-  }
-
-  async onMouseDown(t: models.Token | undefined, p: models.Point) {
-    await this.props.applicationStore!.gameTrySelectTokenAsync(t, p)
   }
 
   getTableCell(game: GameEngine, r: number, c: number): JSX.Element {
@@ -60,10 +58,13 @@ export default class GameBoard extends Component<GameBoardProps> {
       isSelected = GameEngine.pointsEqual(store.selectedToken.position, token.position)
     }
 
+    const id = `canvas-table-row:${r}:${c}`
+
     return (
       <GameToken
         point={point}
-        key={`GameToken:${r}:${c}`}
+        id={id}
+        key={id}
         isSelected={isSelected}
         isTarget={hasSelection && isTarget}
         token={token}
@@ -72,12 +73,16 @@ export default class GameBoard extends Component<GameBoardProps> {
     )
   }
 
+  async onMouseDown(t: models.Token | undefined, p: models.Point) {
+    await this.props.applicationStore!.gameTrySelectTokenAsync(t, p)
+  }
+
   render() {
     const engine = this.props.applicationStore!.gameEngine!
     const rows = this.getTableRows(engine)
     
     return (
-      <table className='canvas-table'>
+      <table className='canvas-table' id='canvas-table'>
         <tbody>
           {rows}
         </tbody>

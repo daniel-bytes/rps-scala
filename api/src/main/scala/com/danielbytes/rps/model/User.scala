@@ -32,7 +32,7 @@ case class User(
 
 object User {
   final val aiId: UserId = UserId("ai")
-  final val aiName: UserName = UserName("AI")
+  final val aiName: UserName = UserName("Player 2")
   final val unknownName: UserName = UserName("unknown")
 
   /**
@@ -63,7 +63,7 @@ object User {
     UserSource.Google
   )
 
-  def apply(session: Session)(implicit dateTime: DateTimeHelper): User =
+  def apply(session: Session): User =
     session.source match {
       case UserSource.Google => User.google(session.userId, session.userName)
       case UserSource.Native => User.native(session.userId, session.userName)
