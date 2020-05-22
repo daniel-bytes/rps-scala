@@ -17,14 +17,19 @@ case class GoogleTokenRequest(
   authCode: String
 ) extends TokenRequest
 
-class GoogleAuthenticationService()(
-    implicit
-    dateTimeHelper: DateTimeHelper,
-    ec: ExecutionContext
-) {
+trait GoogleAuthenticationService {
   type Request = GoogleTokenRequest
   type Response[T] = Future[Either[AuthenticationError, T]]
 
+  def authenticate(request: Request): Response[User]
+}
+
+class GoogleAuthenticationServiceImpl(
+    val dateTimeHelper: DateTimeHelper
+)(
+    implicit
+    ec: ExecutionContext
+) extends GoogleAuthenticationService {
   def authenticate(request: Request): Response[User] =
     authenticateGoogle(createAuthnRequest(request)).map(
       _.map(_ => createUser(request))

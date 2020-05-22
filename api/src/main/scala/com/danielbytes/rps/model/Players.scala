@@ -17,9 +17,6 @@ case class Player(
 object Player {
   def ai(
     position: StartPosition = StartPositionTop
-  )(
-    implicit
-    dateTime: DateTimeHelper
   ): Player = Player(
     User.ai(),
     position

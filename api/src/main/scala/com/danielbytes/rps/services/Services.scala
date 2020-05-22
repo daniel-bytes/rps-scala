@@ -10,14 +10,22 @@ import scala.concurrent.ExecutionContext
 
 trait Services {
   implicit def ec: ExecutionContext
-  implicit def dateTime: DateTimeHelper
-  implicit def random: RandomHelper
-  implicit def gameRepository: GameRepository
-  implicit def gameRules: GameRules
-  implicit def boardRules: BoardRules
-  implicit def aiRules: PlayerAIRules
   implicit def system: ActorSystem
 
-  implicit lazy val gameService: GameService = new GameServiceImpl()
-  implicit lazy val authService: AuthenticationService = new AuthenticationService()
+  def dateTime: DateTimeHelper
+  def random: RandomHelper
+  def gameRepository: GameRepository
+  def gameRules: GameRules
+  def boardRules: BoardRules
+  def aiRules: PlayerAIRules
+
+  lazy val gameService: GameService = new GameServiceImpl(
+    gameRepository,
+    gameRules,
+    aiRules,
+    boardRules,
+    random
+  )
+
+  lazy val authService: AuthenticationService = new AuthenticationServiceImpl(dateTime)
 }

@@ -6,7 +6,7 @@ import com.danielbytes.rps.model._
  * Trait that defines the computer player's AI rules.
  */
 trait PlayerAIRules {
-  implicit def moveRules: MoveRules
+  def moveRules: MoveRules
 
   /**
    * A player takes a turn in the game
@@ -108,7 +108,4 @@ trait PlayerAIRules {
   }
 }
 
-class PlayerAIRulesEngine()(
-  implicit
-  val moveRules: MoveRules
-) extends PlayerAIRules {}
+class PlayerAIRulesEngine(val moveRules: MoveRules) extends PlayerAIRules {}

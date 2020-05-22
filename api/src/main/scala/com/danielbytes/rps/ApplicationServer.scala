@@ -36,7 +36,7 @@ object ApplicationServer
   implicit val ec: ExecutionContext = system.dispatcher
   implicit val config: ApplicationConfig = ApplicationConfig.instance
 
-  implicit val gameRepository: GameRepository = new RedisGameRepository(config.redis)
+  val gameRepository: GameRepository = new RedisGameRepository(config.redis)
 
   import ApplicationErrorHandler._
 

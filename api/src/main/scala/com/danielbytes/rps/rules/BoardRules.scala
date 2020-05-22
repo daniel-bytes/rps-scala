@@ -6,8 +6,8 @@ import com.danielbytes.rps.model._
 import com.danielbytes.rps.helpers.{ DateTimeHelper, RandomHelper }
 
 trait BoardRules {
-  implicit def dateTime: DateTimeHelper
-  implicit def random: RandomHelper
+  def dateTime: DateTimeHelper
+  def random: RandomHelper
 
   /**
    * Generates a new random single player game
@@ -95,8 +95,7 @@ trait BoardRules {
   }
 }
 
-class BoardRulesEngine()(
-  implicit
+class BoardRulesEngine(
   val dateTime: DateTimeHelper,
   val random: RandomHelper
 ) extends BoardRules {}

@@ -7,8 +7,8 @@ import com.danielbytes.rps.model._
  * This includes handling a player move, and determining the game status.
  */
 trait GameRules {
-  implicit def combatRules: CombatRules
-  implicit def moveRules: MoveRules
+  def combatRules: CombatRules
+  def moveRules: MoveRules
 
   /**
    * A player takes a turn in the game
@@ -202,8 +202,7 @@ trait GameRules {
   )
 }
 
-class GameRulesEngine()(
-  implicit
+class GameRulesEngine(
   val moveRules: MoveRules,
   val combatRules: CombatRules
 ) extends GameRules {}

@@ -42,7 +42,7 @@ object User {
   /**
    * The builtin AI user
    */
-  def ai()(implicit dateTime: DateTimeHelper): User = User(
+  def ai(): User = User(
     aiId,
     aiName,
     UserSource.Native,
@@ -65,7 +65,7 @@ object User {
   def google(
     userId: UserId,
     userName: UserName
-  )(implicit dateTime: DateTimeHelper): User = User(
+  ): User = User(
     userId,
     userName,
     UserSource.Google

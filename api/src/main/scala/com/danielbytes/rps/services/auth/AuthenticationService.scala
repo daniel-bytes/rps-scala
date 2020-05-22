@@ -10,17 +10,24 @@ trait TokenRequest {
   def name: String
 }
 
-class AuthenticationService()(
-    implicit
-    val dateTime: DateTimeHelper,
-    val ec: ExecutionContext
-) {
+trait AuthenticationService {
   type Response = Future[Either[AuthenticationError, User]]
+
+  def authenticate(token: TokenRequest): Response
+}
+
+class AuthenticationServiceImpl(
+    val dateTime: DateTimeHelper
+)(
+    implicit
+    val ec: ExecutionContext
+) extends AuthenticationService {
+  private val google: GoogleAuthenticationService = new GoogleAuthenticationServiceImpl(dateTime)
 
   def authenticate(token: TokenRequest): Response = {
     token match {
       case gt: GoogleTokenRequest =>
-        new GoogleAuthenticationService().authenticate(gt)
+        google.authenticate(gt)
     }
   }
 }

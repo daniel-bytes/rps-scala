@@ -17,11 +17,12 @@ trait GameService {
   private type IntermediateResult[T] = EitherT[Future, ApplicationError, T]
 
   implicit def ec: ExecutionContext
-  implicit def gameRepository: GameRepository
-  implicit def gameRules: GameRules
-  implicit def aiRules: PlayerAIRules
-  implicit def boardRules: BoardRules
-  implicit def random: RandomHelper
+
+  def gameRepository: GameRepository
+  def gameRules: GameRules
+  def aiRules: PlayerAIRules
+  def boardRules: BoardRules
+  def random: RandomHelper
 
   /**
    * Fetches all games for a player
@@ -255,12 +256,13 @@ trait GameService {
   }
 }
 
-class GameServiceImpl()(
-  implicit
-  val ec: ExecutionContext,
+class GameServiceImpl(
   val gameRepository: GameRepository,
   val gameRules: GameRules,
   val aiRules: PlayerAIRules,
   val boardRules: BoardRules,
   val random: RandomHelper
+)(
+  implicit
+  val ec: ExecutionContext
 ) extends GameService {}

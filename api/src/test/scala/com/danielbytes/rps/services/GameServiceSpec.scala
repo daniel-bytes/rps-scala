@@ -24,7 +24,7 @@ class GameServiceSpec
     val gameRepo = new InMemoryGameRepository()
     games.foreach(g => gameRepo.set(g.id, g))
 
-    new GameServiceImpl()(ec, gameRepo, gameRules, aiRules, boardRules, random)
+    new GameServiceImpl(gameRepo, gameRules, aiRules, boardRules, random)(ec)
   }
 
   "GameService" should {
