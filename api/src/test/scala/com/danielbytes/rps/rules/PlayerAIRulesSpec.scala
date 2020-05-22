@@ -1,6 +1,5 @@
 package com.danielbytes.rps.rules
 
-import com.danielbytes.rps
 import com.danielbytes.rps.GameTestData
 import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.model._
@@ -12,7 +11,8 @@ class PlayerAIRulesSpec
     with PlayerAIRules
     with GameTestData
     with Helpers {
-  implicit val moveRules: MoveRules = new MoveRules {}
+  val moveRules: MoveRules = new MoveRules {}
+  def withJitter(value: Double): Double = value
 
   "PlayerAIRules" should {
     "handle computeMove rules" should {

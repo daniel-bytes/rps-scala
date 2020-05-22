@@ -26,9 +26,6 @@ object Player {
     userId: UserId,
     userName: UserName,
     position: StartPosition = StartPositionTop
-  )(
-    implicit
-    dateTime: DateTimeHelper
   ): Player = Player(
     User.native(userId, userName),
     position

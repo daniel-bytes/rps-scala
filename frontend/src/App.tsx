@@ -32,6 +32,9 @@ export default class App extends Component<Props> {
   }
 
   private renderApp() {
+    const combat = this.props.applicationStore!.combat.map(c => 
+      <div>{ c }</div>
+    )
     return (
       <div className="container">
         <div className="two-thirds-row">
@@ -41,9 +44,7 @@ export default class App extends Component<Props> {
           <ActionButtons />
         </div>
         <div className="half-row subtitle">
-          <div>
-            { this.props.applicationStore!.combat }
-          </div>
+          { combat }
           <div>
             { this.props.applicationStore!.subtitle }
           </div>

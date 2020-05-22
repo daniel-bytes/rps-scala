@@ -2,11 +2,21 @@ package com.danielbytes.rps.rules
 
 import com.danielbytes.rps.model._
 
+import scala.util.{ Random, Try }
+
 /**
  * Trait that defines the computer player's AI rules.
  */
 trait PlayerAIRules {
+  /**
+   * Moves rule engine
+   */
   def moveRules: MoveRules
+
+  /**
+   * Takes an input value and applies random jitter
+   */
+  def withJitter(value: Double): Double
 
   /**
    * A player takes a turn in the game
@@ -38,13 +48,15 @@ trait PlayerAIRules {
     userId: UserId,
     moves: Set[MoveResult]
   ): Either[RuleViolationError, MoveResult] = {
-    moves.toList.sortBy {
-      case AttackMove(_, _, _, _, _) => -2
-      case TakePositionMove(_, _, direction) => direction match {
-        case MoveForward => -1
-        case _ => 1
+    moves
+      .toList
+      .sortBy {
+        case AttackMove(_, _, _, _, _) => withJitter(1)
+        case TakePositionMove(_, _, direction) => direction match {
+          case MoveForward => withJitter(2)
+          case _ => withJitter(3)
+        }
       }
-    }
       .headOption
       .map(Right(_))
       .getOrElse(Left(NoMovableTokens))
@@ -108,4 +120,6 @@ trait PlayerAIRules {
   }
 }
 
-class PlayerAIRulesEngine(val moveRules: MoveRules) extends PlayerAIRules {}
+class PlayerAIRulesEngine(val moveRules: MoveRules) extends PlayerAIRules {
+  def withJitter(value: Double): Double = (Random.nextDouble() * 2.0) * value
+}

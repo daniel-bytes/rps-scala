@@ -1,7 +1,5 @@
 package com.danielbytes.rps.model
 
-import java.time.LocalDateTime
-
 import com.danielbytes.rps.helpers.DateTimeHelper
 
 /**
@@ -30,8 +28,6 @@ case class User(
   name: UserName,
   source: UserSource.Value,
   isAI: Boolean = false
-//firstSeenAt: LocalDateTime,
-//lastSeenAt: LocalDateTime
 )
 
 object User {
@@ -47,19 +43,15 @@ object User {
     aiName,
     UserSource.Native,
     isAI = true
-  //dateTime.min(),
-  //dateTime.now()
   )
 
   def native(
     userId: UserId,
     userName: UserName
-  )(implicit dateTime: DateTimeHelper): User = User(
+  ): User = User(
     userId,
     userName,
     UserSource.Native
-  //dateTime.min(),
-  //dateTime.now()
   )
 
   def google(
@@ -69,8 +61,6 @@ object User {
     userId,
     userName,
     UserSource.Google
-  //dateTime.min(),
-  //dateTime.now()
   )
 
   def apply(session: Session)(implicit dateTime: DateTimeHelper): User =

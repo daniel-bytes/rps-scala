@@ -1,6 +1,5 @@
 package com.danielbytes.rps.rules
 
-import com.danielbytes.rps
 import com.danielbytes.rps.GameTestData
 import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.model._

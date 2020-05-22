@@ -1,6 +1,5 @@
 package com.danielbytes.rps.rules
 
-import com.danielbytes.rps
 import com.danielbytes.rps.GameTestData
 import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.model._
@@ -12,8 +11,8 @@ class GameRulesSpec
     with GameRules
     with GameTestData
     with Helpers {
-  implicit val combatRules: CombatRules = new CombatRules {}
-  implicit val moveRules: MoveRules = new MoveRules {}
+  val combatRules: CombatRules = new CombatRules {}
+  val moveRules: MoveRules = new MoveRules {}
 
   "GameRules" should {
     "handle gameTurn rules" should {

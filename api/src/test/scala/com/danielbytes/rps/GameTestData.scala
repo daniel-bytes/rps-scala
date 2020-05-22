@@ -4,7 +4,7 @@ import com.danielbytes.rps.helpers.DateTimeHelper
 import com.danielbytes.rps.model._
 
 trait GameTestData {
-  implicit def dateTime: DateTimeHelper
+  def dateTime: DateTimeHelper
 
   val gid = GameId("Game1")
   val gid2 = GameId("Game2")

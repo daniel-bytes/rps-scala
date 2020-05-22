@@ -9,7 +9,7 @@ import { ApiError } from '../errors/ApiError'
 export interface IApplicationStore {
   readonly apiError: string | null
   readonly subtitle: string | null
-  readonly combat: string | null
+  readonly combat: string[]
   readonly isLoading: boolean
   readonly sessionInitialized: boolean
   readonly loggedIn: boolean
@@ -89,29 +89,32 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @computed
-  public get combat(): string | null {
+  public get combat(): string[] {
     if (this.game) {
       const g = this.game 
 
-      return g.recentMoves.reduce((prev, cur) => {
+      return g.recentMoves.reduce<string[]>((prev, cur) => {
         if (cur.combatSummary) {
           const s = cur.combatSummary
           const them = g.otherPlayerName || 'AI'
 
-          prev += cur.playerId === g.playerId 
+          let str = cur.playerId === g.playerId 
             ? `Your ${s.attackerTokenType} attacked ${them}'s ${s.defenderTokenType}: `
             : `${them}'s ${s.attackerTokenType} attacked your ${s.defenderTokenType}: `
 
           if (s.winnerTokenType)
-            prev += `${s.winnerTokenType} wins!`
+            str += `${s.winnerTokenType} wins!`
           else 
-          prev += "everybody loses"
+            str += "everybody loses"
+          
+          prev.push(str)
+          prev
         }
 
         return prev
-      }, "")
+      }, [])
     }
-    return ""
+    return []
   }
 
   @computed
