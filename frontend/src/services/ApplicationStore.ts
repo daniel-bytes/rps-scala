@@ -9,6 +9,7 @@ import { ApiError } from '../errors/ApiError'
 export interface IApplicationStore {
   readonly apiError: string | null
   readonly subtitle: string | null
+  readonly combat: string | null
   readonly isLoading: boolean
   readonly sessionInitialized: boolean
   readonly loggedIn: boolean
@@ -84,6 +85,32 @@ export class ApplicationStore implements IApplicationStore {
       }
     }
 
+    return ""
+  }
+
+  @computed
+  public get combat(): string | null {
+    if (this.game) {
+      const g = this.game 
+
+      return g.recentMoves.reduce((prev, cur) => {
+        if (cur.combatSummary) {
+          const s = cur.combatSummary
+          const them = g.otherPlayerName || 'AI'
+
+          prev += cur.playerId === g.playerId 
+            ? `Your ${s.attackerTokenType} attacked ${them}'s ${s.defenderTokenType}: `
+            : `${them}'s ${s.attackerTokenType} attacked your ${s.defenderTokenType}: `
+
+          if (s.winnerTokenType)
+            prev += `${s.winnerTokenType} wins!`
+          else 
+          prev += "everybody loses"
+        }
+
+        return prev
+      }, "")
+    }
     return ""
   }
 
@@ -211,7 +238,7 @@ export class ApplicationStore implements IApplicationStore {
         return new Promise(r => r(this));
       }
 
-      if (this.selectedToken) {
+      if (this.selectedToken && this.targetPoints.some(p => GameEngine.pointsEqual(p, point))) {
         return this.gameMoveToPointAsync(point)
       }
     }

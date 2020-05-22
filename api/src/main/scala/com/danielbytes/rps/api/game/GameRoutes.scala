@@ -31,7 +31,7 @@ trait GameRoutes
               complete(
                 gameService.processTurn(GameId(id), session.userId, req.from, req.to)
                   .apiResult(Some(logger))
-                  .map(r => GameApiModel(r.game, session.userId, r.status))
+                  .map(r => GameApiModel(r, session.userId))
               )
             }
           }
@@ -41,7 +41,7 @@ trait GameRoutes
               complete(
                 gameService.getGame(GameId(id), session.userId)
                   .apiResult()
-                  .map(r => GameApiModel(r.game, session.userId, r.status))
+                  .map(r => GameApiModel(r, session.userId))
               )
             } ~
               delete {
@@ -64,7 +64,7 @@ trait GameRoutes
                 complete(
                   gameService.createGame(User(session))
                     .apiResult()
-                    .map(r => GameApiModel(r.game, session.userId, r.status))
+                    .map(r => GameApiModel(r, session.userId))
                 )
               }
           }

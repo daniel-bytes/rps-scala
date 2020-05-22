@@ -35,6 +35,7 @@ class GameServiceSpec
             List(
               GameWithStatus(
                 game,
+                Nil,
                 GameInProgress
               )
             )
@@ -48,10 +49,12 @@ class GameServiceSpec
             List(
               GameWithStatus(
                 game,
+                Nil,
                 GameInProgress
               ),
               GameWithStatus(
                 completedGame,
+                Nil,
                 GameOverFlagCaptured(pid1)
               )
             )
@@ -92,6 +95,7 @@ class GameServiceSpec
                   )
                 )
               ),
+              List(MoveSummary(pid1, Point(0, 1), Point(1, 1), None)),
               GameInProgress
             )
           )
@@ -120,6 +124,10 @@ class GameServiceSpec
                   )
                 ),
                 currentPlayerId = pid1
+              ),
+              List(
+                MoveSummary(pid1, Point(0, 1), Point(1, 1), None),
+                MoveSummary(pid2, Point(0, 2), Point(0, 1), None)
               ),
               GameInProgress
             )
@@ -170,6 +178,15 @@ class GameServiceSpec
                 ),
                 currentPlayerId = pid1
               ),
+              List(
+                MoveSummary(pid1, Point(1, 1), Point(2, 1), None),
+                MoveSummary(
+                  pid2,
+                  Point(0, 2),
+                  Point(0, 1),
+                  Some(AttackerWinsCombat(Token(pid2, Scissor), Token(pid1, Paper)))
+                )
+              ),
               GameInProgress
             )
           )
@@ -189,6 +206,7 @@ class GameServiceSpec
           Right(
             GameWithStatus(
               game,
+              Nil,
               GameInProgress
             )
           )

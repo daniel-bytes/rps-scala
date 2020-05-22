@@ -25,3 +25,10 @@ case class AttackMove(
   attacker: Token,
   defender: Token
 ) extends MoveResult
+
+case class MoveSummary(
+  playerId: UserId,
+  from: Point,
+  to: Point,
+  combatResult: Option[CombatResult]
+)

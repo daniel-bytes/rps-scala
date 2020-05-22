@@ -19,47 +19,60 @@ class GameRulesSpec
     "handle gameTurn rules" should {
       "allow a token move" in {
         gameTurn(game, pid1, Point(0, 1), Point(1, 1)) should ===(
-          Right(game.copy(
-            currentPlayerId = pid2,
-            board = game.board.copy(
-              tokens = Map( /*
-                      ----------------
-                  y2  | S2 |    | F2 |
-                      ----------------
-                  y1  |    | R1 |    |
-                      ----------------
-                  y0  | F1 |    |    |
-                      ----------------
-                        x0   x1   x2   */
-                Point(0, 0) -> Token(pid1, Flag),
-                Point(1, 1) -> Token(pid1, Rock),
-                Point(0, 2) -> Token(pid2, Scissor),
-                Point(2, 2) -> Token(pid2, Flag)
+          Right(GameWithMoveSummary(
+            game.copy(
+              currentPlayerId = pid2,
+              board = game.board.copy(
+                tokens = Map( /*
+                        ----------------
+                    y2  | S2 |    | F2 |
+                        ----------------
+                    y1  |    | R1 |    |
+                        ----------------
+                    y0  | F1 |    |    |
+                        ----------------
+                          x0   x1   x2   */
+                  Point(0, 0) -> Token(pid1, Flag),
+                  Point(1, 1) -> Token(pid1, Rock),
+                  Point(0, 2) -> Token(pid2, Scissor),
+                  Point(2, 2) -> Token(pid2, Flag)
+                )
               )
-            )
+            ),
+            Some(MoveSummary(
+              pid1, Point(0, 1), Point(1, 1), None
+            ))
           ))
         )
       }
 
       "allow a token attack" in {
         gameTurn(game, pid1, Point(0, 1), Point(0, 2)) should ===(
-          Right(game.copy(
-            currentPlayerId = pid2,
-            board = game.board.copy(
-              tokens = Map( /*
-                     ----------------
-                 y2  | R1 |    | F2 |
-                     ----------------
-                 y1  |    |    |    |
-                     ----------------
-                 y0  | F1 |    |    |
-                     ----------------
-                       x0   x1   x2    */
-                Point(0, 0) -> Token(pid1, Flag),
-                Point(0, 2) -> Token(pid1, Rock),
-                Point(2, 2) -> Token(pid2, Flag)
+          Right(GameWithMoveSummary(
+            game.copy(
+              currentPlayerId = pid2,
+              board = game.board.copy(
+                tokens = Map( /*
+                       ----------------
+                   y2  | R1 |    | F2 |
+                       ----------------
+                   y1  |    |    |    |
+                       ----------------
+                   y0  | F1 |    |    |
+                       ----------------
+                         x0   x1   x2    */
+                  Point(0, 0) -> Token(pid1, Flag),
+                  Point(0, 2) -> Token(pid1, Rock),
+                  Point(2, 2) -> Token(pid2, Flag)
+                )
               )
-            )
+            ),
+            Some(MoveSummary(
+              pid1,
+              Point(0, 1),
+              Point(0, 2),
+              Some(AttackerWinsCombat(Token(pid1, Rock), Token(pid2, Scissor)))
+            ))
           ))
         )
       }

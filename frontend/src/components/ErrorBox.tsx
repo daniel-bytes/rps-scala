@@ -18,8 +18,8 @@ function errorMessageFromCode(code: string): string {
 const ErrorBox: React.FunctionComponent<Props> = inject("applicationStore")(observer((props) => {
   return ( 
     props.applicationStore!.apiError ?
-      <div className={`notification is-danger`}>
-        <button className="delete" onClick={ e => props.applicationStore!.clearError() }></button>
+      <div>
+        <button className="delete" onClick={ e => props.applicationStore!.clearError() }>x</button>
         { errorMessageFromCode(props.applicationStore!.apiError) }
       </div> : <span></span>
     )

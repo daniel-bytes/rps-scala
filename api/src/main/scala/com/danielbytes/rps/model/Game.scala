@@ -75,12 +75,19 @@ case class Game(
   }
 }
 
+case class GameWithMoveSummary(
+  game: Game,
+  move: Option[MoveSummary]
+)
+
 /**
- * A game along with it's current calculated status
+ * A game along with it's current calculated status and recent moves
  * @param game The game state result
+ * @param moves The game moves token
  * @param status The game status
  */
 case class GameWithStatus(
   game: Game,
+  moves: List[MoveSummary],
   status: GameStatus
 )

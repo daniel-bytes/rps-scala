@@ -23,11 +23,15 @@ trait GameRules {
     userId: UserId,
     from: Point,
     to: Point
-  ): Either[RuleViolationError, Game] = {
+  ): Either[RuleViolationError, GameWithMoveSummary] = {
     for {
       moveResult <- moveRules.moveToken(game, userId, from, to)
       gameResult <- handleMove(game, from, to, moveResult)
-      result = gameResult.copy(currentPlayerId = game.otherPlayer.id)
+      result = gameResult.copy(
+        game = gameResult.game.copy(
+          currentPlayerId = game.otherPlayer.id
+        )
+      )
     } yield result
   }
 
@@ -73,10 +77,10 @@ trait GameRules {
     from: Point,
     to: Point,
     moveResult: MoveResult
-  ): Either[RuleViolationError, Game] = {
+  ): Either[RuleViolationError, GameWithMoveSummary] = {
     moveResult match {
       case TakePositionMove(f, t, _) =>
-        movePoint(game, f, t)
+        Right(movePoint(game, f, t))
       case AttackMove(f, t, _, attacker, defender) =>
         handleCombat(game, f, t, attacker, defender)
     }
@@ -97,14 +101,28 @@ trait GameRules {
     to: Point,
     attacker: Token,
     defender: Token
-  ): Either[RuleViolationError, Game] = {
+  ): Either[RuleViolationError, GameWithMoveSummary] = {
     combatRules.attackPlayer(attacker, defender) flatMap {
-      case EveryoneLosesCombat =>
-        removePoints(game, from :: to :: Nil)
-      case DefenderWinsCombat(_) =>
-        removePoints(game, from :: Nil)
-      case AttackerWinsCombat(_) =>
-        movePoint(game, from, to)
+      case r: AttackerWinsCombat =>
+        Right(
+          movePoint(game, from, to).copy(
+            move = Some(MoveSummary(game.currentPlayerId, from, to, Some(r)))
+          )
+        )
+      case r: DefenderWinsCombat =>
+        Right(
+          GameWithMoveSummary(
+            removePoints(game, from :: Nil),
+            Some(MoveSummary(game.currentPlayerId, from, to, Some(r)))
+          )
+        )
+      case r: EveryoneLosesCombat =>
+        Right(
+          GameWithMoveSummary(
+            removePoints(game, from :: to :: Nil),
+            Some(MoveSummary(game.currentPlayerId, from, to, Some(r)))
+          )
+        )
     }
   }
 
@@ -119,15 +137,18 @@ trait GameRules {
     game: Game,
     from: Point,
     to: Point
-  ): Either[RuleViolationError, Game] = {
+  ): GameWithMoveSummary = {
     val tokens = game.board.tokens
     val token = tokens(from)
 
-    Right(game.copy(
-      board = game.board.copy(
-        tokens = (tokens - from - to) + (to -> token)
-      )
-    ))
+    GameWithMoveSummary(
+      game.copy(
+        board = game.board.copy(
+          tokens = (tokens - from - to) + (to -> token)
+        )
+      ),
+      Some(MoveSummary(game.currentPlayerId, from, to, None))
+    )
   }
 
   /**
@@ -139,14 +160,14 @@ trait GameRules {
   private def removePoints(
     game: Game,
     points: Iterable[Point]
-  ): Either[RuleViolationError, Game] = {
+  ): Game = {
     val tokens = game.board.tokens
 
-    Right(game.copy(
+    game.copy(
       board = game.board.copy(
         tokens = tokens -- points
       )
-    ))
+    )
   }
 
   /**

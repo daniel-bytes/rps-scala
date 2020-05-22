@@ -28,6 +28,19 @@ export interface Token {
   playerOwned: boolean
 }
 
+export interface CombatSummary {
+  attackerTokenType: TokenType
+  defenderTokenType: TokenType
+  winnerTokenType: TokenType | null
+}
+
+export interface RecentMove {
+  playerId: string
+  from: Point
+  to: Point
+  combatSummary: CombatSummary | null
+}
+
 export interface Game {
   gameId: string
   playerId: string
@@ -38,6 +51,7 @@ export interface Game {
   winnerName: string | null
   board: Geometry
   tokens: Token[]
+  recentMoves: RecentMove[]
 }
 
 export interface GamesOverview {

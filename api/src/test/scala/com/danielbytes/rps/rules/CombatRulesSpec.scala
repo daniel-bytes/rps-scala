@@ -22,20 +22,20 @@ class CombatRulesSpec
 
           (attackerToken, defenderToken) match {
             case (Bomb | Flag, _) => results should ===(Left(TokenNotCapableOfAttackError))
-            case (_, Bomb) => results should ===(Right(EveryoneLosesCombat))
-            case (_, Flag) => results should ===(Right(AttackerWinsCombat(attacker)))
+            case (_, Bomb) => results should ===(Right(EveryoneLosesCombat(attacker, defender)))
+            case (_, Flag) => results should ===(Right(AttackerWinsCombat(attacker, defender)))
 
-            case (Rock, Rock) => results should ===(Right(EveryoneLosesCombat))
-            case (Rock, Paper) => results should ===(Right(DefenderWinsCombat(defender)))
-            case (Rock, Scissor) => results should ===(Right(AttackerWinsCombat(attacker)))
+            case (Rock, Rock) => results should ===(Right(EveryoneLosesCombat(attacker, defender)))
+            case (Rock, Paper) => results should ===(Right(DefenderWinsCombat(attacker, defender)))
+            case (Rock, Scissor) => results should ===(Right(AttackerWinsCombat(attacker, defender)))
 
-            case (Paper, Rock) => results should ===(Right(AttackerWinsCombat(attacker)))
-            case (Paper, Paper) => results should ===(Right(EveryoneLosesCombat))
-            case (Paper, Scissor) => results should ===(Right(DefenderWinsCombat(defender)))
+            case (Paper, Rock) => results should ===(Right(AttackerWinsCombat(attacker, defender)))
+            case (Paper, Paper) => results should ===(Right(EveryoneLosesCombat(attacker, defender)))
+            case (Paper, Scissor) => results should ===(Right(DefenderWinsCombat(attacker, defender)))
 
-            case (Scissor, Rock) => results should ===(Right(DefenderWinsCombat(defender)))
-            case (Scissor, Paper) => results should ===(Right(AttackerWinsCombat(attacker)))
-            case (Scissor, Scissor) => results should ===(Right(EveryoneLosesCombat))
+            case (Scissor, Rock) => results should ===(Right(DefenderWinsCombat(attacker, defender)))
+            case (Scissor, Paper) => results should ===(Right(AttackerWinsCombat(attacker, defender)))
+            case (Scissor, Scissor) => results should ===(Right(EveryoneLosesCombat(attacker, defender)))
           }
         }
       }

@@ -39,6 +39,10 @@ body {
   margin-right: 8px;
 }
 
+.subtitle {
+  min-height: 50px; 
+}
+
 .canvas-table {
   width: 90%;
   border-collapse: collapse;

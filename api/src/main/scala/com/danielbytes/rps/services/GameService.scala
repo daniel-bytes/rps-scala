@@ -42,9 +42,9 @@ trait GameService {
         }
         .collect {
           case (game, Right(status)) if includeCompleted =>
-            GameWithStatus(game, status)
+            GameWithStatus(game, Nil, status)
           case (game, Right(GameInProgress)) =>
-            GameWithStatus(game, GameInProgress)
+            GameWithStatus(game, Nil, GameInProgress)
         }
     } yield Right(results)
   }
@@ -63,7 +63,7 @@ trait GameService {
       fetchResult <- fetchGameFromRepository(gameId)
       validateResult <- validateGameOwner(fetchResult, userId)
       gameStatus <- getGameStatus(validateResult)
-    } yield GameWithStatus(validateResult, gameStatus)).value
+    } yield GameWithStatus(validateResult, Nil, gameStatus)).value
   }
 
   /**
@@ -78,7 +78,7 @@ trait GameService {
     val game = boardRules.generateRandomSinglePlayerGame(player)
 
     saveGameToRepository(game.id, game)
-      .map(g => GameWithStatus(g, GameInProgress))
+      .map(g => GameWithStatus(g, Nil, GameInProgress))
       .value
   }
 
@@ -126,11 +126,15 @@ trait GameService {
     (for {
       fetchResult <- fetchGameFromRepository(gameId)
       processResult1 <- processTurn(fetchResult, userId, from, to)
-      gameStatus1 <- getGameStatus(processResult1)
-      processResult2 <- processAITurn(processResult1, gameStatus1)
-      gameStatus2 <- getGameStatus(processResult2)
-      saveResult <- saveGameToRepository(gameId, processResult2)
-    } yield GameWithStatus(saveResult, gameStatus2)).value
+      gameStatus1 <- getGameStatus(processResult1.game)
+      processResult2 <- processAITurn(processResult1.game, gameStatus1)
+      gameStatus2 <- getGameStatus(processResult2.game)
+      saveResult <- saveGameToRepository(gameId, processResult2.game)
+    } yield GameWithStatus(
+      saveResult,
+      List(processResult1.move, processResult2.move).flatten,
+      gameStatus2
+    )).value
   }
 
   /**
@@ -208,7 +212,7 @@ trait GameService {
     userId: UserId,
     from: Point,
     to: Point
-  ): IntermediateResult[Game] = EitherT[Future, ApplicationError, Game] {
+  ): IntermediateResult[GameWithMoveSummary] = EitherT[Future, ApplicationError, GameWithMoveSummary] {
     Future.successful {
       gameRules.gameTurn(game, userId, from, to)
     }
@@ -223,7 +227,7 @@ trait GameService {
   private def processAITurn(
     game: Game,
     status: GameStatus
-  ): IntermediateResult[Game] = EitherT[Future, ApplicationError, Game] {
+  ): IntermediateResult[GameWithMoveSummary] = EitherT[Future, ApplicationError, GameWithMoveSummary] {
     Future.successful {
       status match {
         case GameInProgress if game.currentPlayer.isAI => {
@@ -231,8 +235,8 @@ trait GameService {
             .computeMove(game, game.currentPlayerId)
             .flatMap(r => gameRules.gameTurn(game, game.currentPlayerId, r.from, r.to))
         }
-        case GameInProgress => Right(game)
-        case _: GameOverStatus => Right(game)
+        case GameInProgress => Right(GameWithMoveSummary(game, None))
+        case _: GameOverStatus => Right(GameWithMoveSummary(game, None))
       }
     }
   }

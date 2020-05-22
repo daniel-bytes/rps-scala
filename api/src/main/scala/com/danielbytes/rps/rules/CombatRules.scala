@@ -21,20 +21,14 @@ trait CombatRules {
     (attacker.tokenType, defender.tokenType) match {
       case (Bomb | Flag, _) => Left(TokenNotCapableOfAttackError)
 
-      case (_, Bomb) => Right(EveryoneLosesCombat)
-      case (_, Flag) => Right(AttackerWinsCombat(attacker))
+      case (_, Flag) | (Rock, Scissor) | (Paper, Rock) | (Scissor, Paper) =>
+        Right(AttackerWinsCombat(attacker, defender))
 
-      case (Rock, Rock) => Right(EveryoneLosesCombat)
-      case (Rock, Paper) => Right(DefenderWinsCombat(defender))
-      case (Rock, Scissor) => Right(AttackerWinsCombat(attacker))
+      case (Rock, Paper) | (Paper, Scissor) | (Scissor, Rock) =>
+        Right(DefenderWinsCombat(attacker, defender))
 
-      case (Paper, Rock) => Right(AttackerWinsCombat(attacker))
-      case (Paper, Paper) => Right(EveryoneLosesCombat)
-      case (Paper, Scissor) => Right(DefenderWinsCombat(defender))
-
-      case (Scissor, Rock) => Right(DefenderWinsCombat(defender))
-      case (Scissor, Paper) => Right(AttackerWinsCombat(attacker))
-      case (Scissor, Scissor) => Right(EveryoneLosesCombat)
+      case (_, Bomb) | (Rock, Rock) | (Paper, Paper) | (Scissor, Scissor) =>
+        Right(EveryoneLosesCombat(attacker, defender))
     }
   }
 }
