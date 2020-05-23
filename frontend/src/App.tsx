@@ -42,13 +42,11 @@ export default class App extends Component<Props> {
         <div className="one-third-row">
           <ActionButtons />
         </div>
-        <div className="half-row subtitle">
+        <div className="full-row subtitle">
           { combat }
           <div>
             { this.props.applicationStore!.subtitle }
           </div>
-        </div>
-        <div className="half-row">
           <ErrorBox />
         </div>
         <div className="full-row">

@@ -66,7 +66,7 @@ trait BoardRules {
           generateTokensForType(scissorCount, Scissor)
       )
 
-      if (tokens.indexOf(Flag) > tokens.size / 2) {
+      if (tokens.indexOf(Flag) > ((tokens.size / 2) - 1)) {
         generateTokenTypes()
       } else {
         tokens
