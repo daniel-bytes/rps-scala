@@ -5,23 +5,23 @@ sealed trait TokenType {
 }
 
 case object Rock extends TokenType {
-  def name: String = "rock"
+  def name: String = "Rock"
 }
 
 case object Paper extends TokenType {
-  def name: String = "paper"
+  def name: String = "Paper"
 }
 
 case object Scissor extends TokenType {
-  def name: String = "scissor"
+  def name: String = "Scissor"
 }
 
 case object Bomb extends TokenType {
-  def name: String = "bomb"
+  def name: String = "Bomb"
 }
 
 case object Flag extends TokenType {
-  def name: String = "flag"
+  def name: String = "Flag"
 }
 
 case class Token(
@@ -35,5 +35,6 @@ case class Token(
 }
 
 object Token {
-  final val types = Rock :: Paper :: Scissor :: Bomb :: Flag :: Nil
+  final val types: List[TokenType] = Rock :: Paper :: Scissor :: Bomb :: Flag :: Nil
+  final val other = "Other"
 }

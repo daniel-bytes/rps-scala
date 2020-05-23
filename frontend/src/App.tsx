@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { ActionButtons } from './components/ActionButtons'
-import ErrorBox from './components/ErrorBox'
+import Notifications from './components/Notifications'
 import GameApp from './components/GameApp'
 import { IApplicationStore } from './services/ApplicationStore'
 
@@ -42,12 +42,8 @@ export default class App extends Component<Props> {
         <div className="one-third-row">
           <ActionButtons />
         </div>
-        <div className="full-row subtitle">
-          { combat }
-          <div>
-            { this.props.applicationStore!.subtitle }
-          </div>
-          <ErrorBox />
+        <div className="full-row">
+          <Notifications />
         </div>
         <div className="full-row">
           { this.props.applicationStore!.loggedIn && <GameApp /> }

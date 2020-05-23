@@ -83,7 +83,7 @@ object GameApiModel {
       y <- 0 to game.game.board.geometry.rows
       token = game.game.board.tokens.get(Point(x, y))
       playerOwned = token.exists(_.owner == userId)
-      tokenType <- token.map { t => if (playerOwned) t.tokenType.name else "other" }
+      tokenType <- token.map { t => if (playerOwned) t.tokenType.name else Token.other }
     } yield TokenApiModel(Point(x, y), tokenType, playerOwned)
 
     val (isGameOver: Boolean, winnerId: Option[UserId]) = game.status match {
@@ -103,9 +103,9 @@ object GameApiModel {
         move.to,
         move.combatResult.map(result =>
           CombatSummaryApiModel(
-            attackerTokenType = result.attacker.tokenType.toString,
-            defenderTokenType = result.defender.tokenType.toString,
-            winnerTokenType = result.winner.map(_.tokenType.toString)
+            attackerTokenType = result.attacker.tokenType.name,
+            defenderTokenType = result.defender.tokenType.name,
+            winnerTokenType = result.winner.map(_.tokenType.name)
           ))
       ))
 

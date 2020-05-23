@@ -14,12 +14,12 @@ export interface Move {
 }
 
 export enum TokenType {
-  rock = "rock",
-  paper = "paper",
-  scissor = "scissor",
-  bomb = "bomb",
-  flag = "flag",
-  other = "other"
+  rock = "Rock",
+  paper = "Paper",
+  scissor = "Scissor",
+  bomb = "Bomb",
+  flag = "Flag",
+  other = "Other"
 }
 
 export interface Token {

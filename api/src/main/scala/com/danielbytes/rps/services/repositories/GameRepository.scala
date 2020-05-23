@@ -261,23 +261,14 @@ private[repositories] object SerializationModels {
       }
     }
 
-    private def toTokenType(s: String) = Try {
-      s match {
-        case "rock" => Rock
-        case "paper" => Paper
-        case "scissor" => Scissor
-        case "bomb" => Bomb
-        case "flag" => Flag
-        case _ => throw SerializationException(s"Invalid TokenType [$s]")
-      }
+    private def toTokenType(s: String): Try[TokenType] = Try {
+      Token.types.find(_.name == s).getOrElse(throw SerializationException(s"Invalid TokenType [$s]"))
     }
 
-    private def toPoint(s: String) = Try {
+    private def toPoint(s: String): Try[Point] = Try {
       s.split(":") match {
         case Array(x, y) =>
-          Try {
-            Point(x.toInt, y.toInt)
-          }
+          Try(Point(x.toInt, y.toInt))
             .getOrElse(throw SerializationException(s"Invalid Point [$s]"))
         case _ => throw SerializationException(s"Invalid Point [$s]")
       }
