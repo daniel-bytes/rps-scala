@@ -3,57 +3,67 @@ body {
   color: #1a1a1a;
 }
 
-.container {
+#container {
+  max-width: 600px;
+  margin-left: 5%;
+}
+
+header {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
 }
 
-.one-third-row {
-  width: 33%;
-  margin-bottom: 2%;
+h1 {
+  text-decoration: underline;
 }
 
-.two-thirds-row {
-  width: 66%;
-  margin-bottom: 2%;
+footer {
+  border-top: solid 1pt #818181;
+  margin-top: 20pt;
+  padding-top: 20pt;
+  font-size: 10pt;
+  text-align: center;
+  font-style: italic;
 }
 
-.half-row {
-  width: 48%;
-  margin-bottom: 2%;
-}
-
-.full-row {
-  width: 100%;
-  margin-bottom: 2%;
-}
-
-.buttons {
-  text-align: right;
-  margin-top: 24px;
+#buttons {
+  margin-top: 20pt;
+  display: flex;
+  justify-content: space-between;
 }
 
 .button {
-  width: 45%;
-  margin-right: 8px;
+  margin-left: 5pt;
+  cursor: pointer;
 }
 
-.subtitle {
-  min-height: 67px; 
+#authorize-container {
+  width: 50%;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
-.canvas-table {
-  width: 90%;
+#authorize_button {
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 20px;
+}
+
+#notifications {
+  min-height: 70px; 
+}
+
+#canvas-table {
   border-collapse: collapse;
+  margin-left: 50px;
 }
 
 .canvas-table-row {
-  height: 70px;
+  height: 66px;
 }
 
 .canvas-table-cell {
-  width: 60px;
+  min-width: 50pt;
   border: 1pt solid black;
   text-align: center;
   vertical-align: middle;
@@ -70,4 +80,70 @@ body {
 
 .target-cell {
   background-color: #aaaa;
+}
+
+@media only screen and (max-width: 768px) {
+  #container {
+    max-width: unset;
+    margin: unset;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 14pt;
+    text-decoration: underline;
+  }
+
+  footer {
+    margin-top: 20pt;
+    font-size: 6pt;
+    text-align: right;
+    font-style: italic;
+  }
+
+  #instructions {
+    max-width: 85%;
+  }
+  
+  #buttons {
+    margin-top: 6pt;
+    margin-right: 5pt;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  #authorize-container {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  #authorize_button {
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 20px;
+  }
+
+  #notifications {
+    font-size: 9pt;
+  }
+
+  #canvas-table {
+    border-collapse: collapse;
+    margin: unset;
+  }
+  
+  .canvas-table-row {
+    height: 65px;
+  }
+  
+  .canvas-table-cell {
+    min-width: unset;
+    font-size: 9pt;
+    max-width: 49px;
+    border: 1pt solid black;
+    text-align: center;
+    vertical-align: middle;
+    user-select: none;
+  }
 }

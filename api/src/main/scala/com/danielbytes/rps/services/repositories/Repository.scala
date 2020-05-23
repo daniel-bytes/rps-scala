@@ -3,12 +3,35 @@ package com.danielbytes.rps.services.repositories
 import scala.collection.mutable
 import scala.concurrent.{ ExecutionContext, Future }
 
+/**
+ * Generic repository, providing an interface for simple key/value storage
+ * @tparam TID The type of the Id / key
+ * @tparam TModel The type of the model
+ */
 trait Repository[TID <: AnyVal, TModel] {
+  /**
+   * Get a model by key, or return [[None]]
+   */
   def get(id: TID): Future[Option[TModel]]
+
+  /**
+   * Store a model in the repository
+   */
   def set(id: TID, model: TModel): Future[Unit]
+
+  /**
+   * Remove a model from the repository
+   */
   def remove(id: TID): Future[Unit]
 }
 
+/**
+ * Simple in-memory generic implementation of a [[Repository]], useful for testing
+ * @param initialData The intial data to populate the repository
+ * @param ec The execution context
+ * @tparam TID The type of the Id / key
+ * @tparam TModel The type of the model
+ */
 class InMemoryRepository[TID <: AnyVal, TModel](
     initialData: (TID, TModel)*
 )(

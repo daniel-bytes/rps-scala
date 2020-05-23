@@ -1,6 +1,6 @@
 package com.danielbytes.rps.api.game
 
-import com.danielbytes.rps.model.{ GameOverStatus, _ }
+import com.danielbytes.rps.model._
 
 case class GameMoveApiModel(
   from: Point,

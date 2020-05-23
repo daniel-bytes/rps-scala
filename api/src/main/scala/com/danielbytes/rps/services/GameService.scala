@@ -35,7 +35,7 @@ trait GameService {
     includeCompleted: Boolean
   ): Result[List[GameWithStatus]] = {
     for {
-      playerGames <- gameRepository.playerGames(userId)
+      playerGames <- gameRepository.listPlayerGames(userId)
 
       results = playerGames
         .map { game =>

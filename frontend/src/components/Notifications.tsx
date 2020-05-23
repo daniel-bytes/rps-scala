@@ -11,7 +11,7 @@ const Notifications: React.FunctionComponent<Props> = inject("applicationStore")
   const combat = props.applicationStore!.combat.map((c: string) => <div>{ c }</div>)
 
   return ( 
-    <div className="subtitle">
+    <div className="notifications">
       { combat }
       <div>
         { props.applicationStore!.subtitle }

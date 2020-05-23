@@ -16,24 +16,27 @@ export const ActionButtons: React.SFC<Props> = inject("applicationStore")(observ
   const endGameStyle = props.applicationStore.navState === NavigationState.PlayGamePage ? 'inline' : 'none'
 
   return (
-    <div className="buttons">
-      <button 
-        className="button"
-        id="end_game_button" 
-        style={{ display: endGameStyle }}
-        onClick={ props.applicationStore.endGameButtonPressedAsync }>New Game</button>
-    
-      <button 
-        className="button"
-        id="authorize_button" 
-        style={{ display: loginStyle }}
-        onClick={ props.applicationStore.signInButtonPressedAsync }>Sign In With Google To Play</button>
-    
-      <button 
-        className="button"
-        id="signout_button" 
-        style={{ display: logoutStyle }}
-        onClick={ props.applicationStore.signOutButtonPressedAsync }>Sign Out</button>
+    <div id="buttons">
+      <i className="icon-refresh button" 
+          id="end_game_button"
+          onClick={ props.applicationStore.endGameButtonPressedAsync }
+          style={{ display: endGameStyle }}
+          title="New Game">
+      </i>
+      
+      <i className="icon-sign-in button" 
+          id="authorize_button"
+          onClick={ props.applicationStore.signInButtonPressedAsync }
+          style={{ display: loginStyle }}
+          title="Sign In With Google To Play">
+      </i>
+
+      <i className="icon-sign-out button" 
+          id="signout_button"
+          onClick={ props.applicationStore.signOutButtonPressedAsync }
+          style={{ display: logoutStyle }}
+          title="Sign Out">
+      </i>
     </div> 
   )
 }))

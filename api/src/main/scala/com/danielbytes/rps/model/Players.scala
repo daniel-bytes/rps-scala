@@ -12,6 +12,7 @@ case class Player(
   def id: UserId = user.id
   def name: UserName = user.name
   def isAI: Boolean = user.isAI
+  def isHuman: Boolean = !isAI
 }
 
 object Player {

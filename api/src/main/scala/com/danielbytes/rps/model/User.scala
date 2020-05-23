@@ -1,7 +1,5 @@
 package com.danielbytes.rps.model
 
-import com.danielbytes.rps.helpers.DateTimeHelper
-
 /**
  * The authentication source for a user
  */

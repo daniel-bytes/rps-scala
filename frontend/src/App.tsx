@@ -3,6 +3,7 @@ import { observer, inject } from 'mobx-react'
 import { ActionButtons } from './components/ActionButtons'
 import Notifications from './components/Notifications'
 import GameApp from './components/GameApp'
+import Instructions from './components/Instructions'
 import { IApplicationStore } from './services/ApplicationStore'
 
 interface Props {
@@ -32,22 +33,28 @@ export default class App extends Component<Props> {
   }
 
   private renderApp() {
-    const combat = this.props.applicationStore!.combat.map(c => <div>{ c }</div>)
-
     return (
-      <div className="container">
-        <div className="two-thirds-row">
-          <h2 className="title">Rock/Paper/Scissor</h2>
-        </div>
-        <div className="one-third-row">
+      <div id="container">
+        <header className="container">
+          <h1>Rock/Paper/Scissor - Battle!</h1>
           <ActionButtons />
-        </div>
-        <div className="full-row">
-          <Notifications />
-        </div>
-        <div className="full-row">
+        </header>
+
+        <section id="instructions">
+          { !this.props.applicationStore!.loggedIn && <Instructions /> }
+        </section>
+
+        <section id="notifications">
+          { this.props.applicationStore!.loggedIn && <Notifications /> }
+        </section>
+
+        <section id="game-app">
           { this.props.applicationStore!.loggedIn && <GameApp /> }
-        </div>
+        </section>
+        
+        <footer>
+          <a href="https://github.com/daniel-bytes/rps-scala">© Daniel Battaglia 2020</a>
+        </footer>
       </div>
     )
   }

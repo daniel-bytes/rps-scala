@@ -15,6 +15,6 @@ export default class GameApp extends Component<Props> {
   }
 
   render() {
-    return <GameBoard />
+    return <div className="game-app"><GameBoard /></div>
   }
 }

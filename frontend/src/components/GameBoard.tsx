@@ -82,7 +82,7 @@ export default class GameBoard extends Component<GameBoardProps> {
     const rows = this.getTableRows(engine)
     
     return (
-      <table className='canvas-table' id='canvas-table'>
+      <table id='canvas-table'>
         <tbody>
           {rows}
         </tbody>
