@@ -65,6 +65,8 @@ export default class GameBoard extends Component<GameBoardProps> {
         point={point}
         id={id}
         key={id}
+        isPlayer={!!token && token.playerOwned}
+        isOtherPlayer={!!token && !token.playerOwned}
         isSelected={isSelected}
         isTarget={hasSelection && isTarget}
         token={token}

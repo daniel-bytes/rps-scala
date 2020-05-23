@@ -70,6 +70,14 @@ footer {
   user-select: none;
 }
 
+.player-cell {
+  background-color: rgb(176, 190, 233);
+}
+
+.other-player-cell {
+  background-color: rgb(200, 228, 224);
+}
+
 .cell-movable {
   cursor: pointer;
 }
@@ -79,7 +87,7 @@ footer {
 }
 
 .target-cell {
-  background-color: #aaaa;
+  background-color: #d9d9f0;
 }
 
 @media only screen and (max-width: 768px) {

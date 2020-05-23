@@ -8,6 +8,8 @@ export interface GameTokenProps {
   point: models.Point
   isSelected: boolean
   isTarget: boolean
+  isPlayer: boolean
+  isOtherPlayer: boolean
   token: models.Token | undefined
   applicationStore?: IApplicationStore
   onMouseDown: (t: models.Token | undefined, p: models.Point) => void
@@ -29,10 +31,12 @@ export default class GameToken extends Component<GameTokenProps> {
 
     if (this.props.isSelected) {
       cssClass += ' selected-cell'
-    }
-
-    if (this.props.isTarget) {
+    } else if (this.props.isTarget) {
       cssClass += ' target-cell'
+    } else if (this.props.isPlayer) {
+      cssClass += ' player-cell'
+    } else if (this.props.isOtherPlayer) {
+      cssClass += ' other-player-cell'
     }
 
     return cssClass
