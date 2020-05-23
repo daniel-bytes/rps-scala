@@ -53,7 +53,7 @@ export default class App extends Component<Props> {
         </section>
         
         <footer>
-          <a href="https://github.com/daniel-bytes/rps-scala">© Daniel Battaglia 2020</a>
+          <a href="https://github.com/daniel-bytes/rps-scala" target="_blank">© Daniel Battaglia 2020</a>
         </footer>
       </div>
     )

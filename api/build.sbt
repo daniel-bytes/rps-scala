@@ -32,3 +32,5 @@ lazy val root = (project in file(".")).
       "org.scalatest"     %% "scalatest"            % scalaTestVersion % Test
     )
   )
+
+enablePlugins(JavaAppPackaging)

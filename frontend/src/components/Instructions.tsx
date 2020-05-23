@@ -59,7 +59,7 @@ const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(
         </li>
       </ol>
       <p>
-        <a href="https://github.com/daniel-bytes/rps-scala">Check out the source on Github</a>
+        <a href="https://github.com/daniel-bytes/rps-scala" target="_blank">Check out the source on Github</a>
       </p>
     </div>
   )
