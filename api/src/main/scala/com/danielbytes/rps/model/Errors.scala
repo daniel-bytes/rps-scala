@@ -48,20 +48,22 @@ case object PlayerNotFoundError extends GameServiceError {
 }
 
 sealed trait AuthenticationError extends ApplicationError
+case object UnknownTokenType extends AuthenticationError
 case class AuthenticationFailedError(msg: String) extends AuthenticationError
 
 /**
  * An error that indicates the game board geometry is in an invalid and unfixable state
  */
-case class BoardGeometryException(
-  rows: Int,
-  columns: Int
-) extends IllegalStateException(s"Illegal game board geometry: $rows rows, $columns columns.")
+case class BoardGeometryException(rows: Int, columns: Int)
+  extends IllegalStateException(
+    s"Illegal game board geometry: $rows rows, $columns columns."
+  )
 
 /**
  * An error that indicates the game player is incorrect
  */
-case class IncorrectPlayerException() extends IllegalStateException(s"Illegal player.")
+case class IncorrectPlayerException()
+  extends IllegalStateException(s"Illegal player.")
 
 /**
  * An error that indicates the game board token count is invalid
@@ -74,12 +76,14 @@ case class BoardTokenCountException(
   rockCount: Int,
   paperCount: Int,
   scissorCount: Int
-) extends IllegalStateException(
-  s"Illegal token count for game board token count: $rows rows, $columns columns, " +
-    s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
 )
+    extends IllegalStateException(
+      s"Illegal token count for game board token count: $rows rows, $columns columns, " +
+        s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
+    )
 
 /**
  * Serialization / Deserialization failed
  */
-case class SerializationException(msg: String) extends IllegalStateException(msg)
+case class SerializationException(msg: String)
+  extends IllegalStateException(msg)

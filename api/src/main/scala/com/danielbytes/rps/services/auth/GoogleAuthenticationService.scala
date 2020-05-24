@@ -17,11 +17,8 @@ case class GoogleTokenRequest(
   authCode: String
 ) extends TokenRequest
 
-trait GoogleAuthenticationService {
+trait GoogleAuthenticationService extends AuthenticationService {
   type Request = GoogleTokenRequest
-  type Response[T] = Future[Either[AuthenticationError, T]]
-
-  def authenticate(request: Request): Response[User]
 }
 
 class GoogleAuthenticationServiceImpl(
@@ -30,14 +27,16 @@ class GoogleAuthenticationServiceImpl(
     implicit
     ec: ExecutionContext
 ) extends GoogleAuthenticationService {
-  def authenticate(request: Request): Response[User] =
+  private type GoogleAuthnResponse = Future[Either[AuthenticationError, GoogleTokenResponse]]
+
+  def authenticate(request: Request): Response =
     authenticateGoogle(createAuthnRequest(request)).map(
       _.map(_ => createUser(request))
     )
 
   private def authenticateGoogle(
     request: GoogleAuthorizationCodeTokenRequest
-  ): Response[GoogleTokenResponse] =
+  ): GoogleAuthnResponse =
     Future.successful {
       try {
         Right(request.execute())

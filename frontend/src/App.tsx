@@ -19,7 +19,7 @@ export default class App extends Component<Props> {
   }
 
   async onSignInClick() {
-    await this.props.applicationStore!.loginAsync()
+    await this.props.applicationStore!.loginGoogleAsync()
   }
 
   onSignOutClick() {

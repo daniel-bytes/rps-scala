@@ -13,15 +13,13 @@ import com.softwaremill.session.SessionDirectives._
 import com.softwaremill.session.SessionOptions._
 import com.softwaremill.session._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationSessionManager {
   val config = ApplicationConfig.instance
 
-  val serializer = new MultiValueSessionSerializer[Session](
-    s => s.toMap,
-    m => Session(m)
-  )
+  val serializer =
+    new MultiValueSessionSerializer[Session](s => s.toMap, m => Session(m))
 
   val secret = config.auth.session.key
   val sessionEncoder = new BasicSessionEncoder[Session]()(serializer)
@@ -37,13 +35,17 @@ object ApplicationSessionManager {
 trait ApplicationSessionDirectives {
   import ApplicationSessionManager._
 
-  implicit def authService: AuthenticationService
+  def googleAuthenticationService: GoogleAuthenticationService
+  def anonymousAuthenticationService: AnonymousAuthenticationService
+
   implicit def ec: ExecutionContext
   implicit def system: ActorSystem
   private lazy val logger = Logging.getLogger(system, this)
 
   def createSession(user: User): Directive1[Session] =
-    setSession(sessionType, sessionTransport, Session(user)) & provide(Session(user))
+    setSession(sessionType, sessionTransport, Session(user)) & provide(
+      Session(user)
+    )
 
   val requireSession: Directive1[Session] =
     requiredSession(sessionType, sessionTransport)
@@ -54,11 +56,20 @@ trait ApplicationSessionDirectives {
   val terminateSession: Directive0 =
     invalidateSession(sessionType, sessionTransport)
 
-  def authenticate(
-    request: TokenRequest
-  ): Directive1[User] = {
-    onSuccess(
-      authService.authenticate(request).apiResult(Some(logger))
-    ) flatMap provide
+  def authenticate(token: TokenRequest): Directive1[User] = {
+    onSuccess(authenticateToken(token).apiResult(Some(logger))) flatMap provide
+  }
+
+  private def authenticateToken(
+    token: TokenRequest
+  ): AuthenticationService#Response = {
+    token match {
+      case gt: GoogleTokenRequest =>
+        googleAuthenticationService.authenticate(gt)
+      case at: AnonymousTokenRequest =>
+        anonymousAuthenticationService.authenticate(at)
+      case _ =>
+        Future.successful(Left(UnknownTokenType))
+    }
   }
 }

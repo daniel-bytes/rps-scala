@@ -1,33 +1,26 @@
 package com.danielbytes.rps.services.auth
 
 import com.danielbytes.rps.model.{ AuthenticationError, User }
-import com.danielbytes.rps.helpers.DateTimeHelper
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
+/**
+ * Authentication token model contract
+ */
 trait TokenRequest {
   def id: String
   def name: String
 }
 
+/**
+ * Authentication service contract
+ */
 trait AuthenticationService {
+  type Request <: TokenRequest
   type Response = Future[Either[AuthenticationError, User]]
 
-  def authenticate(token: TokenRequest): Response
-}
-
-class AuthenticationServiceImpl(
-    val dateTime: DateTimeHelper
-)(
-    implicit
-    val ec: ExecutionContext
-) extends AuthenticationService {
-  private val google: GoogleAuthenticationService = new GoogleAuthenticationServiceImpl(dateTime)
-
-  def authenticate(token: TokenRequest): Response = {
-    token match {
-      case gt: GoogleTokenRequest =>
-        google.authenticate(gt)
-    }
-  }
+  /**
+   * Authenticates a token, yielding a User or error
+   */
+  def authenticate(token: Request): Response
 }

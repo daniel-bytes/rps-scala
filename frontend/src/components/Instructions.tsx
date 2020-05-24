@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { observer, inject } from 'mobx-react'
 import { IApplicationStore } from '../services/ApplicationStore'
+import { AuthenticationType } from '../models/NavigationModels'
 
 interface Props {
   applicationStore?: IApplicationStore
@@ -9,16 +10,26 @@ interface Props {
 const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(observer((props) => {
   return ( 
     <div className="instructions">
-      <h3>
-        <em>Capture the Flag</em> meets <em>Rock, Paper, Scissor</em>!
+      <h3 id="instructions-title">
+        <em>Capture the Flag</em> meets <em>Rock, Paper, Scissor</em>
       </h3>
 
       <div id="authorize-container">
+        { props.applicationStore!.authenticationType === AuthenticationType.Anonymous &&
+        <button
+            id="start-button"
+            onClick={ props.applicationStore!.signInAnonymousButtonPressedAsync }>
+          Start A New Game
+        </button>
+        }
+
+        { props.applicationStore!.authenticationType === AuthenticationType.Google &&
         <a className="icon-sign-in" 
-            id="authorize_button"
-            onClick={ props.applicationStore!.signInButtonPressedAsync }>
+            id="authorize-button"
+            onClick={ props.applicationStore!.signInGoogleButtonPressedAsync }>
           Sign In With Google To Play
         </a>
+        }
       </div>
       
       <p>

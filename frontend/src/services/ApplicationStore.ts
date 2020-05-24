@@ -1,5 +1,5 @@
 import { observable, action, computed, runInAction } from 'mobx'
-import { NavigationState } from '../models/NavigationModels'
+import { NavigationState, AuthenticationType } from '../models/NavigationModels'
 import * as models from '../models/GameModels'
 import { IGameService } from './GameService'
 import { ISessionService } from './SessionService'
@@ -22,10 +22,12 @@ export interface IApplicationStore {
   readonly selectedToken: models.Token | undefined
   readonly targetPoints: models.Point[]
 
+  readonly authenticationType: AuthenticationType
+
   clearError(): void
 
   initializeSessionStoreAsync(): Promise<IApplicationStore>
-  loginAsync(): Promise<IApplicationStore>
+  loginGoogleAsync(): Promise<IApplicationStore>
   logout(): IApplicationStore
 
   // Game app
@@ -36,7 +38,8 @@ export interface IApplicationStore {
   
   // Nav buttons
   endGameButtonPressedAsync(): Promise<IApplicationStore>
-  signInButtonPressedAsync(): Promise<IApplicationStore>
+  signInGoogleButtonPressedAsync(): Promise<IApplicationStore>
+  signInAnonymousButtonPressedAsync(): Promise<IApplicationStore>
   signOutButtonPressedAsync(): Promise<IApplicationStore>
 }
 
@@ -72,6 +75,9 @@ export class ApplicationStore implements IApplicationStore {
 
   @observable
   public loggedIn: boolean = false
+
+  @observable
+  public authenticationType: AuthenticationType = AuthenticationType.Anonymous
 
   @computed
   public get subtitle(): string | null {
@@ -167,9 +173,9 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @action.bound
-  public async loginAsync(): Promise<IApplicationStore> {
+  public async loginGoogleAsync(): Promise<IApplicationStore> {
     await this.apiAction(async () => {
-      await this._sessionStore.loginAsync()
+      await this._sessionStore.loginGoogleAsync()
 
       runInAction(() => { 
         this.loggedIn = true 
@@ -287,9 +293,21 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @action.bound
-  public async signInButtonPressedAsync(): Promise<IApplicationStore> {
+  public async signInGoogleButtonPressedAsync(): Promise<IApplicationStore> {
     await this.apiAction(async () => {
-      await this._sessionStore.loginAsync()
+      await this._sessionStore.loginGoogleAsync()
+      
+      runInAction(() => {
+        this.loggedIn = true
+      })
+    })
+    return this
+  }
+
+  @action.bound
+  public async signInAnonymousButtonPressedAsync(): Promise<IApplicationStore> {
+    await this.apiAction(async () => {
+      await this._sessionStore.loginAnonymousAsync()
       
       runInAction(() => {
         this.loggedIn = true

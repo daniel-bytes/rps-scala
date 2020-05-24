@@ -4,16 +4,23 @@ import scala.collection.mutable
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
- * Generic repository, providing an interface for simple key/value storage
+ * Generic read-only repository, providing an interface for simple key/value lookups
  * @tparam TID The type of the Id / key
  * @tparam TModel The type of the model
  */
-trait Repository[TID <: AnyVal, TModel] {
+trait ReadOnlyRepository[TID <: AnyVal, TModel] {
   /**
    * Get a model by key, or return None
    */
   def get(id: TID): Future[Option[TModel]]
+}
 
+/**
+ * Generic repository, providing an interface for simple key/value storage
+ * @tparam TID The type of the Id / key
+ * @tparam TModel The type of the model
+ */
+trait Repository[TID <: AnyVal, TModel] extends ReadOnlyRepository[TID, TModel] {
   /**
    * Store a model in the repository
    */

@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid'
 import * as user from '../models/UserModels'
 import * as session from '../models/SessionModels'
 import { GoogleAuthService } from './GoogleAuthService'
@@ -8,7 +9,8 @@ import { IApiClientFactory, IApiClient, ApiClient } from './ApiClient'
  */
 export interface ISessionService {  
   initializeAsync(): Promise<ISessionService>
-  loginAsync(): Promise<ISessionService>
+  loginGoogleAsync(): Promise<ISessionService>
+  loginAnonymousAsync(): Promise<ISessionService>
   
   getSessionState(): session.SessionState | null
   updateSessionState(state: session.SessionState): void
@@ -34,9 +36,22 @@ export class SessionService implements ISessionService, IApiClientFactory {
     return this
   }
 
-  public async loginAsync(): Promise<ISessionService> {
+  public async loginGoogleAsync(): Promise<ISessionService> {
     const user = await this._google.requestToken()
-    const result = await this.loadTokenAsync(user)
+    const result = await this.loadGoogleTokenAsync(user)
+
+    this.updateSessionState(result)
+    
+    return this
+  }
+
+  public async loginAnonymousAsync(): Promise<ISessionService> {
+    const user = {
+      id: uuidv4(),
+      name: 'Player 1'
+    }
+    
+    const result = await this.loadAnonymousTokenAsync(user)
 
     this.updateSessionState(result)
     
@@ -76,9 +91,9 @@ export class SessionService implements ISessionService, IApiClientFactory {
   }
 
   /**
-   * Creates a new token by POST-ing to the API server
+   * Creates a new token by POST-ing to the API server /google endpoint
    */
-  private async loadTokenAsync(user: user.User): Promise<session.SessionState> {
+  private async loadGoogleTokenAsync(user: user.User): Promise<session.SessionState> {
     const request = {
       id: user.id,
       name: user.name,
@@ -88,6 +103,33 @@ export class SessionService implements ISessionService, IApiClientFactory {
     // fetching a token so we want to use a token-less API client
     const api = new ApiClient(null)
     const response = await api.postAsync<object>(this._url + '/google', request)
+    
+    if (response.status === 200) {
+      const token = response.headers.get(`set-authorization`)
+
+      if (token) {
+        return { user, token, gameId: null }
+      } else {
+        throw new Error(`Auth token was null`)
+      }
+    } else {
+      console.error(response)
+      throw new Error(`Token request failed with ${response.status}`)
+    }
+  }
+
+  /**
+   * Creates a new token by POST-ing to the API server /anonymous endpoint
+   */
+  private async loadAnonymousTokenAsync(user: user.User): Promise<session.SessionState> {
+    const request = {
+      id: user.id,
+      name: user.name
+    }
+
+    // fetching a token so we want to use a token-less API client
+    const api = new ApiClient(null)
+    const response = await api.postAsync<object>(this._url + '/anonymous', request)
     
     if (response.status === 200) {
       const token = response.headers.get(`set-authorization`)

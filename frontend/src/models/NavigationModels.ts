@@ -3,3 +3,8 @@ export enum NavigationState {
   ListGamesPage,
   PlayGamePage
 }
+
+export enum AuthenticationType {
+  Anonymous,
+  Google
+}

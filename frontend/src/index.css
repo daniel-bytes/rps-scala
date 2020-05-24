@@ -15,6 +15,16 @@ header {
 
 h1 {
   text-decoration: underline;
+  font-weight: bold;
+}
+
+h3 > em {
+  color: rgb(15, 70, 61);
+}
+
+em {
+  color: rgb(89, 111, 177);
+  font-weight: bold;
 }
 
 footer {
@@ -35,6 +45,11 @@ footer {
 .button {
   margin-left: 5pt;
   cursor: pointer;
+}
+
+button#start-button {
+  background-color: #aaaaff;
+  color: #333;
 }
 
 #authorize-container {
@@ -142,13 +157,13 @@ footer {
   }
   
   .canvas-table-row {
-    height: 65px;
+    height: 60px;
   }
   
   .canvas-table-cell {
-    min-width: unset;
+    min-width: 33pt;
+    width: 40pt;
     font-size: 9pt;
-    max-width: 49px;
     border: 1pt solid black;
     text-align: center;
     vertical-align: middle;

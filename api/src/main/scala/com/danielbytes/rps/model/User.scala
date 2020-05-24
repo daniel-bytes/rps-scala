@@ -5,7 +5,7 @@ package com.danielbytes.rps.model
  */
 object UserSource extends Enumeration {
   type UserSource = Value
-  val Native, Google = Value
+  val BuiltIn, Anonymous, Google = Value
 }
 
 /**
@@ -36,34 +36,19 @@ object User {
   /**
    * The builtin AI user
    */
-  def ai(): User = User(
-    aiId,
-    aiName,
-    UserSource.Native,
-    isAI = true
-  )
+  def ai(): User = User(aiId, aiName, UserSource.BuiltIn, isAI = true)
 
-  def native(
-    userId: UserId,
-    userName: UserName
-  ): User = User(
-    userId,
-    userName,
-    UserSource.Native
-  )
+  def anonymous(userId: UserId, userName: UserName): User =
+    User(userId, userName, UserSource.Anonymous)
 
-  def google(
-    userId: UserId,
-    userName: UserName
-  ): User = User(
-    userId,
-    userName,
-    UserSource.Google
-  )
+  def google(userId: UserId, userName: UserName): User =
+    User(userId, userName, UserSource.Google)
 
   def apply(session: Session): User =
     session.source match {
-      case UserSource.Google => User.google(session.userId, session.userName)
-      case UserSource.Native => User.native(session.userId, session.userName)
+      case UserSource.Google =>
+        User.google(session.userId, session.userName)
+      case UserSource.Anonymous =>
+        User.anonymous(session.userId, session.userName)
     }
 }

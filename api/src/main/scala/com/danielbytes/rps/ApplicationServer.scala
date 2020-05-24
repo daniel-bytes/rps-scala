@@ -17,7 +17,9 @@ import com.danielbytes.rps.config.ApplicationConfig
 import com.danielbytes.rps.rules.Rules
 import com.danielbytes.rps.services._
 import com.danielbytes.rps.helpers.Helpers
+import com.danielbytes.rps.services.auth.{ AnonymousAuthenticationService, GoogleAuthenticationService, GoogleAuthenticationServiceImpl }
 import com.danielbytes.rps.services.repositories._
+import redis.RedisClient
 
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration.Duration
@@ -34,10 +36,8 @@ object ApplicationServer
   implicit val system: ActorSystem = ActorSystem("GameServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContext = system.dispatcher
-  implicit val config: ApplicationConfig = ApplicationConfig.instance
 
-  val gameRepository: GameRepository = new AkkaRedisGameRepository(config.redis)
-  //new RedisGameRepository(config.redis)
+  val config: ApplicationConfig = ApplicationConfig.instance
 
   import ApplicationErrorHandler._
 
