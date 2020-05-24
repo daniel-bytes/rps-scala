@@ -366,6 +366,8 @@ export class ApplicationStore implements IApplicationStore {
       if (e instanceof ApiError) {
         if (e.status === 401) {
           this._sessionStore.clearSessionState()
+        } else if (e.status === 404) {
+          await this.initializeGameAppAsync()
         } else if (e.status === 409) {
           // reload app on version conflict
           await this.initializeGameAppAsync()

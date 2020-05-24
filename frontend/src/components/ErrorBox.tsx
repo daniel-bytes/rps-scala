@@ -11,7 +11,8 @@ function errorMessageFromCode(code: string): string {
     case 'not-a-movable-token': 
       return 'Not a movable token'
     case 'version-conflict':
-      return 'Game state was out of date, try again'
+    case 'game-not-found':
+      return 'Game was out of sync and had to be refreshed, try again'
     default: 
       return 'An error occured'
   }
@@ -21,8 +22,8 @@ const ErrorBox: React.FunctionComponent<Props> = inject("applicationStore")(obse
   return ( 
     props.applicationStore!.apiError ?
       <div>
-        <button className="delete" onClick={ e => props.applicationStore!.clearError() }>x </button>
-        { errorMessageFromCode(props.applicationStore!.apiError) }
+        <button id="error-button" onClick={ e => props.applicationStore!.clearError() }>x</button>
+        <em className="error">{ errorMessageFromCode(props.applicationStore!.apiError) }</em>
       </div> : <span></span>
     )
 }))
