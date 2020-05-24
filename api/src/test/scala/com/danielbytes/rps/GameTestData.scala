@@ -12,6 +12,8 @@ trait GameTestData {
   val p1 = Player.player(pid1, UserName("Player 1"), StartPositionBottom)
   val pid2 = UserId("p2")
   val p2 = Player.player(pid2, UserName("Player 2"), StartPositionTop)
+  val version1 = GameVersion(1)
+  val version2 = GameVersion(2)
 
   val game = Game(
     gid,
@@ -20,7 +22,8 @@ trait GameTestData {
     pid1,
     Board(
       Geometry(3, 3),
-      Map( /*
+      Map(
+        /*
             ----------------
         y2  | S2 |    | F2 |
             ----------------
@@ -35,7 +38,8 @@ trait GameTestData {
         Point(0, 2) -> Token(pid2, Scissor),
         Point(2, 2) -> Token(pid2, Flag)
       )
-    )
+    ),
+    version1
   )
 
   val gameWithAI = game.copy(

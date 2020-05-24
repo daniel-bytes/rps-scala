@@ -10,14 +10,12 @@ import akka.http.scaladsl.server.directives.PathDirectives.path
 import com.danielbytes.rps.api.session.ApplicationSessionDirectives
 import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.services.ApplicationServiceSyntax._
-import com.danielbytes.rps.model.{ GameId, User }
+import com.danielbytes.rps.model.{ GameId, GameVersion, User }
 import com.danielbytes.rps.services.GameService
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 
-trait GameRoutes
-    extends ApplicationSessionDirectives
-    with Helpers {
+trait GameRoutes extends ApplicationSessionDirectives with Helpers {
   implicit def system: ActorSystem
   implicit def gameService: GameService
   private lazy val logger = Logging.getLogger(system, this)
@@ -29,7 +27,8 @@ trait GameRoutes
           post {
             entity(as[GameMoveApiModel]) { req =>
               complete(
-                gameService.processTurn(GameId(id), session.userId, req.from, req.to)
+                gameService
+                  .processTurn(GameId(id), session.userId, req.from, req.to, GameVersion(req.version))
                   .apiResult(Some(logger))
                   .map(r => GameApiModel(r, session.userId))
               )
@@ -39,7 +38,8 @@ trait GameRoutes
           path(Segment) { id =>
             get {
               complete(
-                gameService.getGame(GameId(id), session.userId)
+                gameService
+                  .getGame(GameId(id), session.userId)
                   .apiResult()
                   .map(r => GameApiModel(r, session.userId))
               )
@@ -53,16 +53,19 @@ trait GameRoutes
           pathEndOrSingleSlash {
             get {
               complete(
-                gameService.getPlayerGames(session.userId, includeCompleted = true)
+                gameService
+                  .getPlayerGames(session.userId, includeCompleted = true)
                   .apiResult()
-                  .map(r => GameOverviewsApiModel(
-                    r.map(g => GameOverviewApiModel(session.userId, g))
-                  ))
+                  .map(r =>
+                    GameOverviewsApiModel(
+                      r.map(g => GameOverviewApiModel(session.userId, g))
+                    ))
               )
             } ~
               post {
                 complete(
-                  gameService.createGame(User(session))
+                  gameService
+                    .createGame(User(session))
                     .apiResult()
                     .map(r => GameApiModel(r, session.userId))
                 )

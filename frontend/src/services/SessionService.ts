@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import * as user from '../models/UserModels'
+import { User } from '../models/UserModels'
 import * as session from '../models/SessionModels'
 import { GoogleAuthService } from './GoogleAuthService'
 import { IApiClientFactory, IApiClient, ApiClient } from './ApiClient'
@@ -93,7 +93,7 @@ export class SessionService implements ISessionService, IApiClientFactory {
   /**
    * Creates a new token by POST-ing to the API server /google endpoint
    */
-  private async loadGoogleTokenAsync(user: user.User): Promise<session.SessionState> {
+  private async loadGoogleTokenAsync(user: User): Promise<session.SessionState> {
     const request = {
       id: user.id,
       name: user.name,
@@ -121,7 +121,7 @@ export class SessionService implements ISessionService, IApiClientFactory {
   /**
    * Creates a new token by POST-ing to the API server /anonymous endpoint
    */
-  private async loadAnonymousTokenAsync(user: user.User): Promise<session.SessionState> {
+  private async loadAnonymousTokenAsync(user: User): Promise<session.SessionState> {
     const request = {
       id: user.id,
       name: user.name

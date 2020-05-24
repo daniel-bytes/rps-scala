@@ -9,6 +9,7 @@ import scala.util.Try
  * Repository trait for managing Game data
  */
 trait GameRepository extends Repository[GameId, Game] {
+
   /**
    * Return all Games belonging to a User
    */
@@ -34,7 +35,8 @@ private[repositories] object SerializationModels {
     currentPlayerId: String,
     rows: Int,
     columns: Int,
-    tokens: Map[String, String]
+    tokens: Map[String, String],
+    version: Int
   )
 
   object GameModel {
@@ -64,10 +66,8 @@ private[repositories] object SerializationModels {
           position = s2
         ),
         currentPlayerId = UserId(m.currentPlayerId),
-        board = Board(
-          geometry = Geometry(m.rows, m.columns),
-          tokens = tokens
-        )
+        board = Board(geometry = Geometry(m.rows, m.columns), tokens = tokens),
+        version = GameVersion(m.version)
       )
     }
 
@@ -86,7 +86,10 @@ private[repositories] object SerializationModels {
       currentPlayerId = model.currentPlayerId.value,
       rows = model.board.geometry.rows,
       columns = model.board.geometry.columns,
-      tokens = model.board.tokens.map { case (p, t) => (toString(p), toString(t)) }
+      tokens = model.board.tokens.map {
+        case (p, t) => (toString(p), toString(t))
+      },
+      version = model.version.value
     )
 
     private def toString(s: StartPosition) = s match {
@@ -111,7 +114,9 @@ private[repositories] object SerializationModels {
     }
 
     private def toTokenType(s: String): Try[TokenType] = Try {
-      Token.types.find(_.name == s).getOrElse(throw SerializationException(s"Invalid TokenType [$s]"))
+      Token.types
+        .find(_.name == s)
+        .getOrElse(throw SerializationException(s"Invalid TokenType [$s]"))
     }
 
     private def toPoint(s: String): Try[Point] = Try {

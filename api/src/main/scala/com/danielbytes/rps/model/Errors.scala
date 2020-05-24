@@ -11,9 +11,13 @@ sealed trait ApplicationError {
 
 /**
  * Exception that holds an [[ApplicationError]]
- * @param errorType The error condition
+ * @param error The error condition
  */
 case class ApplicationErrorException(error: ApplicationError) extends Exception
+
+case object VersionConflictError extends ApplicationError {
+  override def status: StatusCode = StatusCodes.Conflict
+}
 
 /**
  * ApplicationError type that indicates a rule has been broken
@@ -62,8 +66,7 @@ case class BoardGeometryException(rows: Int, columns: Int)
 /**
  * An error that indicates the game player is incorrect
  */
-case class IncorrectPlayerException()
-  extends IllegalStateException(s"Illegal player.")
+case class IncorrectPlayerException() extends IllegalStateException(s"Illegal player.")
 
 /**
  * An error that indicates the game board token count is invalid
@@ -76,14 +79,12 @@ case class BoardTokenCountException(
   rockCount: Int,
   paperCount: Int,
   scissorCount: Int
+) extends IllegalStateException(
+  s"Illegal token count for game board token count: $rows rows, $columns columns, " +
+    s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
 )
-    extends IllegalStateException(
-      s"Illegal token count for game board token count: $rows rows, $columns columns, " +
-        s"$flagCount flags, $bombCount bombs, $rockCount rocks, $paperCount papers, $scissorCount scissors."
-    )
 
 /**
  * Serialization / Deserialization failed
  */
-case class SerializationException(msg: String)
-  extends IllegalStateException(msg)
+case class SerializationException(msg: String) extends IllegalStateException(msg)

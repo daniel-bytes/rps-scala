@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from 'react'
+import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import GameBoard from './GameBoard'
 import { ApplicationStore } from '../services/ApplicationStore'

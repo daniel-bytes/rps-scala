@@ -11,6 +11,7 @@ export interface Geometry {
 export interface Move {
   from: Point
   to: Point
+  version?: number
 }
 
 export enum TokenType {
@@ -52,6 +53,7 @@ export interface Game {
   board: Geometry
   tokens: Token[]
   recentMoves: RecentMove[]
+  version: number
 }
 
 export interface GamesOverview {

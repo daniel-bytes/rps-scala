@@ -1,7 +1,5 @@
 import { IApiClientFactory } from "./ApiClient"
 import * as models from "../models/GameModels"
-import { ApiError } from "../errors/ApiError"
-
 
 export interface IGameService {
   listGamesAsync(): Promise<models.GamesOverview>

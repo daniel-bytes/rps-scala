@@ -114,7 +114,6 @@ export class ApplicationStore implements IApplicationStore {
             str += "everybody loses"
           
           prev.push(str)
-          prev
         }
 
         return prev
@@ -220,6 +219,8 @@ export class ApplicationStore implements IApplicationStore {
 
       runInAction(() => {
         this.game = game
+        this.selectedToken = undefined
+        this.targetPoints = []
         
         if (game) {
           this.setGameInSession(game)
@@ -261,7 +262,11 @@ export class ApplicationStore implements IApplicationStore {
       const engine = this.gameEngine!
       
       if (engine.canMove() && this.selectedToken) {
-        const move = { from: this.selectedToken.position, to: point }
+        const move = { 
+          from: this.selectedToken.position, 
+          to: point,
+          version: engine.model.version
+        }
 
         if (engine.isValidMove(move)) {
           const game = await this._gameStore.gameMoveAsync(engine.model.gameId, move)
@@ -361,6 +366,9 @@ export class ApplicationStore implements IApplicationStore {
       if (e instanceof ApiError) {
         if (e.status === 401) {
           this._sessionStore.clearSessionState()
+        } else if (e.status === 409) {
+          // reload app on version conflict
+          await this.initializeGameAppAsync()
         }
         
         runInAction(() => {

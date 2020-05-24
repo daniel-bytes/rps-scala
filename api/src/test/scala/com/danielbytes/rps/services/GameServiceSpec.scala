@@ -9,13 +9,7 @@ import org.scalatest._
 
 import scala.concurrent.ExecutionContext
 
-class GameServiceSpec
-    extends WordSpec
-    with Matchers
-    with GameTestData
-    with TestUtils
-    with Helpers
-    with Rules {
+class GameServiceSpec extends WordSpec with Matchers with GameTestData with TestUtils with Helpers with Rules {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   def gameService(
@@ -63,23 +57,26 @@ class GameServiceSpec
       }
 
       "return nothing for an unknown player" in {
-        wait(gameService(List(game, completedGame)).getPlayerGames(UserId("baduser"), includeCompleted = false)) should ===(
-          Right(
-            List()
+        wait(
+          gameService(List(game, completedGame)).getPlayerGames(UserId("baduser"), includeCompleted = false)
+        ) should ===(
+            Right(
+              List()
+            )
           )
-        )
       }
     }
 
     "handle processTurn" should {
       "allow a token move" in {
-        wait(gameService(List(game)).processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService(List(game)).processTurn(gid, pid1, Point(0, 1), Point(1, 1), version1)) should ===(
           Right(
             GameWithStatus(
               game.copy(
                 currentPlayerId = pid2,
                 board = game.board.copy(
-                  tokens = Map( /*
+                  tokens = Map(
+                    /*
                           ----------------
                       y2  | S2 |    | F2 |
                           ----------------
@@ -93,7 +90,8 @@ class GameServiceSpec
                     Point(0, 2) -> Token(pid2, Scissor),
                     Point(2, 2) -> Token(pid2, Flag)
                   )
-                )
+                ),
+                version = version2
               ),
               List(MoveSummary(pid1, Point(0, 1), Point(1, 1), None)),
               GameInProgress
@@ -103,12 +101,13 @@ class GameServiceSpec
       }
 
       "allow a token move followed by an AI move" in {
-        wait(gameService(List(gameWithAI)).processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService(List(gameWithAI)).processTurn(gid, pid1, Point(0, 1), Point(1, 1), version1)) should ===(
           Right(
             GameWithStatus(
               gameWithAI.copy(
                 board = game.board.copy(
-                  tokens = Map( /*
+                  tokens = Map(
+                    /*
                           ----------------
                       y2  |    |    | F2 |
                           ----------------
@@ -123,7 +122,8 @@ class GameServiceSpec
                     Point(2, 2) -> Token(pid2, Flag)
                   )
                 ),
-                currentPlayerId = pid1
+                currentPlayerId = pid1,
+                version = version2
               ),
               List(
                 MoveSummary(pid1, Point(0, 1), Point(1, 1), None),
@@ -138,7 +138,8 @@ class GameServiceSpec
       "AI move winning an attack correctly sets currentPlayerId to human player" in {
         val newGame = gameWithAI.copy(
           board = gameWithAI.board.copy(
-            tokens = Map( /*
+            tokens = Map(
+              /*
                         ----------------
                     y2  | S2 |    | F2 |
                         ----------------
@@ -156,12 +157,13 @@ class GameServiceSpec
             )
           )
         )
-        wait(gameService(List(newGame)).processTurn(gid, pid1, Point(1, 1), Point(2, 1))) should ===(
+        wait(gameService(List(newGame)).processTurn(gid, pid1, Point(1, 1), Point(2, 1), version1)) should ===(
           Right(
             GameWithStatus(
               newGame.copy(
                 board = game.board.copy(
-                  tokens = Map( /*
+                  tokens = Map(
+                    /*
                         ---------------
                     y2  | |  |   | F2 |
                         --v------------
@@ -176,7 +178,8 @@ class GameServiceSpec
                     Point(2, 2) -> Token(pid2, Flag)
                   )
                 ),
-                currentPlayerId = pid1
+                currentPlayerId = pid1,
+                version = version2
               ),
               List(
                 MoveSummary(pid1, Point(1, 1), Point(2, 1), None),
@@ -194,8 +197,14 @@ class GameServiceSpec
       }
 
       "fail when game does not exist" in {
-        wait(gameService().processTurn(gid, pid1, Point(0, 1), Point(1, 1))) should ===(
+        wait(gameService().processTurn(gid, pid1, Point(0, 1), Point(1, 1), version1)) should ===(
           Left(GameNotFoundError)
+        )
+      }
+
+      "fail when game version is incorrect" in {
+        wait(gameService(List(game)).processTurn(gid, pid1, Point(1, 1), Point(2, 1), version2)) should ===(
+          Left(VersionConflictError)
         )
       }
     }

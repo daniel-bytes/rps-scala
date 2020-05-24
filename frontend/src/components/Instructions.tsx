@@ -24,11 +24,11 @@ const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(
         }
 
         { props.applicationStore!.authenticationType === AuthenticationType.Google &&
-        <a className="icon-sign-in" 
+        <i className="icon-sign-in" 
             id="authorize-button"
             onClick={ props.applicationStore!.signInGoogleButtonPressedAsync }>
           Sign In With Google To Play
-        </a>
+        </i>
         }
       </div>
       
@@ -70,7 +70,7 @@ const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(
         </li>
       </ol>
       <p>
-        <a href="https://github.com/daniel-bytes/rps-scala" target="_blank">Check out the source on Github</a>
+        <a href="https://github.com/daniel-bytes/rps-scala" target="_blank" rel="noopener noreferrer">Check out the source on Github</a>
       </p>
     </div>
   )

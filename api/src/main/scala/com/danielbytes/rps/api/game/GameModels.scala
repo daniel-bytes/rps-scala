@@ -4,7 +4,8 @@ import com.danielbytes.rps.model._
 
 case class GameMoveApiModel(
   from: Point,
-  to: Point
+  to: Point,
+  version: Int
 )
 
 case class CombatSummaryApiModel(
@@ -36,6 +37,7 @@ case class GameOverviewApiModel(
 )
 
 object GameOverviewApiModel {
+
   def apply(userId: UserId, model: GameWithStatus): GameOverviewApiModel = {
     val player = model.game.player(userId).getOrElse(throw IncorrectPlayerException())
     val other = model.game.notPlayer(userId)
@@ -70,10 +72,12 @@ case class GameApiModel(
   winnerName: Option[String],
   board: Geometry,
   tokens: List[TokenApiModel],
-  recentMoves: List[GameMoveSummaryApiModel]
+  recentMoves: List[GameMoveSummaryApiModel],
+  version: Int
 )
 
 object GameApiModel {
+
   def apply(
     game: GameWithStatus,
     userId: UserId
@@ -119,8 +123,8 @@ object GameApiModel {
       winnerName = maybeWinningPlayer.map(_.name.value),
       board = game.game.board.geometry,
       tokens = board.toList,
-      recentMoves = recentMoves
+      recentMoves = recentMoves,
+      version = game.game.version.value
     )
   }
 }
-

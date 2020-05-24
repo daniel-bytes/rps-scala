@@ -20,10 +20,7 @@ case class GameOverNoMoreTokens(winner: UserId) extends GameOverStatus {
   def winnerId: Option[UserId] = Some(winner)
 }
 
-case class Board(
-    geometry: Geometry,
-    tokens: Map[Point, Token]
-) {
+case class Board(geometry: Geometry, tokens: Map[Point, Token]) {
   def playerTokens(userId: UserId): List[Token] = {
     tokens.values.filter(_.owner == userId).toList
   }
@@ -31,12 +28,17 @@ case class Board(
 
 case class GameId(value: String) extends AnyVal
 
+case class GameVersion(value: Int) extends AnyVal {
+  def increment(): GameVersion = this.copy(value = this.value + 1)
+}
+
 case class Game(
-    id: GameId,
+  id: GameId,
     player1: Player,
     player2: Player,
     currentPlayerId: UserId,
-    board: Board
+    board: Board,
+    version: GameVersion
 ) {
   val playerList = List(player1, player2)
 
@@ -44,7 +46,9 @@ case class Game(
   lazy val userList = playerList.filterNot(_.isAI)
 
   if (!playerList.exists(_.id == currentPlayerId)) {
-    throw new IllegalStateException(s"Invalid currentPlayerId [$currentPlayerId]")
+    throw new IllegalStateException(
+      s"Invalid currentPlayerId [$currentPlayerId]"
+    )
   }
 
   def currentPlayer: Player = {
@@ -73,12 +77,13 @@ case class Game(
   def withCurrentPlayer(userId: UserId): Game = {
     this.copy(currentPlayerId = userId)
   }
+
+  def incrementVersion(): Game = {
+    this.copy(version = this.version.increment())
+  }
 }
 
-case class GameWithMoveSummary(
-  game: Game,
-  move: Option[MoveSummary]
-)
+case class GameWithMoveSummary(game: Game, move: Option[MoveSummary])
 
 /**
  * A game along with it's current calculated status and recent moves

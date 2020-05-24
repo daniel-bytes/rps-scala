@@ -26,7 +26,8 @@ trait BoardRules {
       player,
       player2,
       player.id,
-      this.generateRandomBoard(player, player2)
+      this.generateRandomBoard(player, player2),
+      GameVersion(1)
     )
   }
 

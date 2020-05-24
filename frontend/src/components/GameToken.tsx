@@ -1,4 +1,4 @@
-import React, { Component, MouseEventHandler } from 'react'
+import React, { Component } from 'react'
 import * as models from '../models/GameModels'
 import { IApplicationStore } from '../services/ApplicationStore'
 import GameEngine from '../services/GameEngine'
