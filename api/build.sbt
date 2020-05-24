@@ -24,7 +24,7 @@ lazy val root = (project in file(".")).
       "org.typelevel"         %% "cats-core"        % "1.5.0",
       "com.google.api-client" % "google-api-client" % "1.25.0",
       "com.softwaremill.akka-http-session" %% "core"  % "0.5.6",
-      "net.debasishg" %% "redisclient" % "3.9",
+      "com.github.etaty" %% "rediscala" % "1.9.0",
 
       "com.typesafe.akka" %% "akka-http-testkit"    % akkaHttpVersion  % Test,
       "com.typesafe.akka" %% "akka-testkit"         % akkaVersion      % Test,

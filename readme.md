@@ -7,6 +7,8 @@ The backend API is implemented using Scala and Akka HTTP.
 
 The frontend is a React and Typescript.
 
+Play it live at https://rock-paper-scissor-battle.herokuapp.com/
+
 
 Rules
 -----
@@ -32,3 +34,23 @@ Requires an active Redis instance.  For local development, you can use Docker:
 docker run --name redis-rps -d -p 6379:6379 redis
 ```
 
+Packaging
+---------
+
+Frontend:
+```
+yarn build
+```
+
+Backend:
+```
+sbt stage
+sbt docker:stage
+sbt docker:publishLocal
+cd target/docker/stage/
+heroku container:push web -a rock-paper-scissor-battle
+heroku container:release web -a rock-paper-scissor-battle
+```
+
+See https://www.freecodecamp.org/news/how-to-dockerise-a-scala-and-akka-http-application-the-easy-way-23310fc880fa/
+See https://devcenter.heroku.com/articles/deploying-scala

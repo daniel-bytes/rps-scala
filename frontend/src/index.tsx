@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { configure } from "mobx"
 import { Provider } from 'mobx-react'
+import './handdrawn.css'
 import './index.css'
 import App from './App'
 import { GoogleAuthService } from './services/GoogleAuthService'

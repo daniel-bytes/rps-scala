@@ -10,7 +10,7 @@ import scala.util.Try
  */
 trait GameRepository extends Repository[GameId, Game] {
   /**
-   * Return all [[Game]]s belonging to a [[User]]
+   * Return all Games belonging to a User
    */
   def listPlayerGames(userId: UserId): Future[List[Game]]
 }

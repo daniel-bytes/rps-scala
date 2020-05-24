@@ -10,7 +10,7 @@ import scala.concurrent.{ ExecutionContext, Future }
  */
 trait Repository[TID <: AnyVal, TModel] {
   /**
-   * Get a model by key, or return [[None]]
+   * Get a model by key, or return None
    */
   def get(id: TID): Future[Option[TModel]]
 
@@ -26,7 +26,7 @@ trait Repository[TID <: AnyVal, TModel] {
 }
 
 /**
- * Simple in-memory generic implementation of a [[Repository]], useful for testing
+ * Simple in-memory generic implementation of a Repository, useful for testing
  * @param initialData The intial data to populate the repository
  * @param ec The execution context
  * @tparam TID The type of the Id / key
