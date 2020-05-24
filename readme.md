@@ -7,7 +7,7 @@ The backend API is implemented using Scala and Akka HTTP.
 
 The frontend is a React and Typescript.
 
-Play it live at https://rock-paper-scissor-battle.herokuapp.com/
+Play it live at https://rock-paper-scissor-battle.com/
 
 Handdrawn CSS from https://fxaeberhard.github.io/handdrawn.css/
 
@@ -35,8 +35,24 @@ Requires an active Redis instance.  For local development, you can use Docker:
 docker run --name redis-rps -d -p 6379:6379 redis
 ```
 
+To run the API server, you need to run with the following env vars exported:
+```
+cd ./api
+export SESSION_KEY=SESSION_KEY_HERE
+export GOOGLE_CLIENT_ID=GOOGLE_CLIENT_ID_HERE
+export GOOGLE_CLIENT_SECRET=GOOGLE_CLIENT_SECRET_HERE
+sbt start
+```
+
+To run the UI
+```
+cd ./frontend
+yarn
+yarn start
+```
+
 Packaging and Deployment
----------
+------------------------
 
 run the script
 ```
