@@ -97,10 +97,12 @@ button#error-button {
 
 .player-cell {
   background-color: rgb(176, 190, 233);
+  transition: color 1s, background-color 1s;
 }
 
 .other-player-cell {
   background-color: rgb(200, 228, 224);
+  transition: color 2s, background-color 2s;
 }
 
 .cell-movable {
@@ -109,10 +111,12 @@ button#error-button {
 
 .selected-cell {
   background-color: #aaaaff;
+  transition: background-color .25s;
 }
 
 .target-cell {
   background-color: #d9d9f0;
+  transition: background-color .25s;
 }
 
 @media only screen and (max-width: 768px) {
