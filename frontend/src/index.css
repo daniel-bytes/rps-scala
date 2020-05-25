@@ -33,6 +33,16 @@ em.error {
   padding-left: 6px;
 }
 
+em.player-token-name {
+  font-weight: bold;
+  color: rgb(89, 111, 177);
+}
+
+em.other-player-token-name {
+  font-weight: bold;
+  color: rgb(15, 70, 61);
+}
+
 footer {
   border-top: solid 1pt #818181;
   margin-top: 20pt;
@@ -116,7 +126,7 @@ button#error-button {
 
 .target-cell {
   background-color: #d9d9f0;
-  transition: background-color .25s;
+  transition: background-color .2s;
 }
 
 @media only screen and (max-width: 768px) {

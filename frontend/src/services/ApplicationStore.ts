@@ -5,11 +5,10 @@ import { IGameService } from './GameService'
 import { ISessionService } from './SessionService'
 import GameEngine from './GameEngine'
 import { ApiError } from '../errors/ApiError'
+import { resolve } from 'dns'
 
 export interface IApplicationStore {
   readonly apiError: string | null
-  readonly subtitle: string | null
-  readonly combat: string[]
   readonly isLoading: boolean
   readonly sessionInitialized: boolean
   readonly loggedIn: boolean
@@ -17,7 +16,6 @@ export interface IApplicationStore {
   readonly navState: NavigationState
 
   readonly game: models.Game | null
-  readonly gameEngine: GameEngine | null
 
   readonly selectedToken: models.Token | undefined
   readonly targetPoints: models.Point[]
@@ -80,49 +78,6 @@ export class ApplicationStore implements IApplicationStore {
   public authenticationType: AuthenticationType = AuthenticationType.Anonymous
 
   @computed
-  public get subtitle(): string | null {
-    if (this.loggedIn) {
-      if (this.game) {
-        if (this.game.isGameOver) {
-          return `Game Over: ${this.game.winnerName} wins!`
-        } else if (this.game.isPlayerTurn) {
-          return "Your Turn"
-        }
-      }
-    }
-
-    return ""
-  }
-
-  @computed
-  public get combat(): string[] {
-    if (this.loggedIn && this.game) {
-      const g = this.game 
-
-      return g.recentMoves.reduce<string[]>((prev, cur) => {
-        if (cur.combatSummary) {
-          const s = cur.combatSummary
-          const them = g.otherPlayerName || 'AI'
-
-          let str = cur.playerId === g.playerId 
-            ? `Your ${s.attackerTokenType} attacked ${them}'s ${s.defenderTokenType}: `
-            : `${them}'s ${s.attackerTokenType} attacked your ${s.defenderTokenType}: `
-
-          if (s.winnerTokenType)
-            str += `${s.winnerTokenType} wins!`
-          else 
-            str += "everybody loses"
-          
-          prev.push(str)
-        }
-
-        return prev
-      }, [])
-    }
-    return []
-  }
-
-  @computed
   public get gameInProgress(): boolean {
     return !!this.game
   }
@@ -130,13 +85,6 @@ export class ApplicationStore implements IApplicationStore {
   @computed
   public get isLoading(): boolean {
     return this.loadingCount > 0
-  }
-
-  @computed.struct
-  public get gameEngine(): GameEngine | null {
-    if (!this.game) return null
-    
-    return new GameEngine(this.game)
   }
 
   @computed
@@ -233,18 +181,18 @@ export class ApplicationStore implements IApplicationStore {
 
   @action.bound
   public gameTrySelectTokenAsync(token: models.Token | undefined, point: models.Point): Promise<IApplicationStore> {
-    const engine = this.gameEngine!
+    const game = this.game!
 
-    if (engine.canMove()) {
+    if (GameEngine.canMove(game)) {
       if (this.selectedToken && GameEngine.pointsEqual(point, this.selectedToken.position)) {
         this.selectedToken = undefined;
         this.targetPoints = [];
         return new Promise(r => r(this));
       }
 
-      if (token && token.playerOwned && engine.canMoveToken(token)) {
+      if (token && token.playerOwned && GameEngine.canMoveToken(game, token)) {
         this.selectedToken = token
-        this.targetPoints = engine.getTargetPoints(token.position)
+        this.targetPoints = GameEngine.getTargetPoints(game, token.position)
         return new Promise(r => r(this));
       }
 
@@ -259,22 +207,38 @@ export class ApplicationStore implements IApplicationStore {
   @action.bound
   public async gameMoveToPointAsync(point: models.Point): Promise<IApplicationStore> {
     await this.apiAction(async () => {
-      const engine = this.gameEngine!
+      const game = this.game!
       
-      if (engine.canMove() && this.selectedToken) {
+      if (GameEngine.canMove(game) && this.selectedToken) {
         const move = { 
           from: this.selectedToken.position, 
           to: point,
-          version: engine.model.version
+          version: game.version
         }
 
-        if (engine.isValidMove(move)) {
-          const game = await this._gameStore.gameMoveAsync(engine.model.gameId, move)
-
+        if (GameEngine.isValidMove(game, move)) {
+          const updatedGame = await this._gameStore.gameMoveAsync(game.gameId, move)
+          
           runInAction(() => {
-            this.game = game
+            game.isPlayerTurn = false
             this.selectedToken = undefined
             this.targetPoints = []
+          })
+
+          for (let recentMove of updatedGame.recentMoves) {
+            const delay = recentMove.playerId === game.playerId ? 50 : 500
+
+            await this.runInDelayedAction(() => {
+              for (let token of game.tokens) {
+                if (GameEngine.pointsEqual(recentMove.from, token.position)) {
+                  token.position = recentMove.to
+                }
+              }
+            }, delay)
+          }
+
+          runInAction(() => {
+            this.game = updatedGame
           })
         }
       }
@@ -382,5 +346,15 @@ export class ApplicationStore implements IApplicationStore {
         this.loadingCount--
       })
     }
+  }
+
+  private async runInDelayedAction<T>(block: () => T, delayMs: number): Promise<T> {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(
+          runInAction<T>(block)
+        )
+      }, delayMs)
+    })
   }
 }

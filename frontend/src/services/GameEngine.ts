@@ -1,40 +1,34 @@
 import * as models from '../models/GameModels'
 
 export default class GameEngine {
-  readonly model: models.Game 
-
-  constructor(game: models.Game) {
-    this.model = game
-  }
-
-  isValidPoint(p: models.Point): boolean {
+  static isValidPoint(game: models.Game, p: models.Point): boolean {
     return p.x >= 0 &&
-      p.x < this.model.board.columns &&
+      p.x < game.board.columns &&
       p.y >= 0 &&
-      p.y <= this.model.board.rows
+      p.y <= game.board.rows
   }
 
-  isValidMove(move: models.Move): boolean {
-    const fromToken = this.getToken(move.from)
+  static isValidMove(game: models.Game, move: models.Move): boolean {
+    const fromToken = GameEngine.getToken(game, move.from)
 
     if (!fromToken || !fromToken.playerOwned) {
       return false
     }
     
-    if (!this.isValidPoint(move.from) || !this.isValidPoint(move.to)) {
+    if (!GameEngine.isValidPoint(game, move.from) || !GameEngine.isValidPoint(game, move.to)) {
       return false
     }
 
-    const toToken = this.getToken(move.to)
+    const toToken = GameEngine.getToken(game, move.to)
 
     return toToken === undefined || !toToken.playerOwned
   }
 
-  canMove(): boolean {
-    return this.model.isPlayerTurn && !this.model.isGameOver
+  static canMove(game: models.Game): boolean {
+    return game.isPlayerTurn && !game.isGameOver
   }
 
-  getTargetPoints(p: models.Point): models.Point[] {
+  static getTargetPoints(game: models.Game, p: models.Point): models.Point[] {
     const points = [
       { x: p.x + 0, y: p.y - 1 },
       { x: p.x + 0, y: p.y + 1 },
@@ -43,7 +37,7 @@ export default class GameEngine {
     ]
 
     return points.reduce((results, point) => {
-      if (this.isValidMove({ from: p, to: point })) {
+      if (this.isValidMove(game, { from: p, to: point })) {
         results.push(point)
       }
 
@@ -51,12 +45,12 @@ export default class GameEngine {
     }, Array<models.Point>())
   }
 
-  canMoveToken(t: models.Token): boolean {
-    return GameEngine.isMovableTokenType(t) && this.getTargetPoints(t.position).length > 0
+  static canMoveToken(game: models.Game, t: models.Token): boolean {
+    return GameEngine.isMovableTokenType(t) && GameEngine.getTargetPoints(game, t.position).length > 0
   }
 
-  getToken(p: models.Point): models.Token | undefined {
-    return this.model.tokens.find(t => t.position.x === p.x && t.position.y === p.y)
+  static getToken(game: models.Game, p: models.Point): models.Token | undefined {
+    return game.tokens.find(t => t.position.x === p.x && t.position.y === p.y)
   }
 
   static isMovableTokenType(t: models.Token): boolean {
