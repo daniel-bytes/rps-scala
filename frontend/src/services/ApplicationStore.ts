@@ -226,20 +226,20 @@ export class ApplicationStore implements IApplicationStore {
           })
 
           for (let recentMove of updatedGame.recentMoves) {
-            const delay = recentMove.playerId === game.playerId ? 50 : 500
+            const playerTurn = recentMove.playerId === game.playerId
 
-            await this.runInDelayedAction(() => {
+            await this.runInDelayedAction(async () => {
               for (let token of game.tokens) {
                 if (GameEngine.pointsEqual(recentMove.from, token.position)) {
                   token.position = recentMove.to
                 }
               }
-            }, delay)
+            }, playerTurn ? 50 : 300)
           }
 
-          runInAction(() => {
+          await this.runInDelayedAction(async () => {
             this.game = updatedGame
-          })
+          }, 300)
         }
       }
     })

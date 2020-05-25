@@ -48,6 +48,7 @@ export default class GameBoard extends Component<GameBoardProps> {
     let isSelected = false
     const point = { x: c, y: r }
     const token = GameEngine.getToken(game, point)
+    const tokens = GameEngine.getTokens(game, point)
     const hasSelection = !!store.selectedToken
                         
     const isTarget = this.props.applicationStore!.targetPoints.some(
@@ -69,6 +70,7 @@ export default class GameBoard extends Component<GameBoardProps> {
         isOtherPlayer={!!token && !token.playerOwned}
         isSelected={isSelected}
         isTarget={hasSelection && isTarget}
+        isUnderAttack={tokens.length > 1}
         token={token}
         applicationStore={this.props.applicationStore}
         onMouseDown={this.onMouseDown.bind(this)} />

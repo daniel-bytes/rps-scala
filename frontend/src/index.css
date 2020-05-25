@@ -68,6 +68,12 @@ button#start-button {
   color: #333;
 }
 
+button#new-game-button {
+  background-color: #aaaaff;
+  color: #333;
+  margin-bottom: 10px;
+}
+
 button#error-button {
   font-weight: bold;
 }
@@ -112,7 +118,7 @@ button#error-button {
 
 .other-player-cell {
   background-color: rgb(200, 228, 224);
-  transition: color 2s, background-color 2s;
+  transition: color 2s, background-color 1s;
 }
 
 .cell-movable {
@@ -127,6 +133,11 @@ button#error-button {
 .target-cell {
   background-color: #d9d9f0;
   transition: background-color .2s;
+}
+
+.attacked-cell {
+  background-color: #ee6262;
+  transition: background-color 1s;
 }
 
 @media only screen and (max-width: 768px) {

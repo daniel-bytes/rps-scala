@@ -10,6 +10,7 @@ export interface GameTokenProps {
   isTarget: boolean
   isPlayer: boolean
   isOtherPlayer: boolean
+  isUnderAttack: boolean
   token: models.Token | undefined
   applicationStore?: IApplicationStore
   onMouseDown: (t: models.Token | undefined, p: models.Point) => void
@@ -28,19 +29,26 @@ export default class GameToken extends Component<GameTokenProps> {
       GameEngine.isMovableTokenType(this.props.token) && 
       GameEngine.getTargetPoints(game, this.props.point).length > 0
 
-    if (isTarget || hasTargets) {
-      cssClass += ' cell-movable'
+    if (this.props.isUnderAttack) {
+      cssClass += ' attacked-cell'
+    } else {
+      if (isTarget || hasTargets) {
+        cssClass += ' cell-movable'
+      }
+
+      if (this.props.isSelected) {
+        cssClass += ' selected-cell'
+      } else if (this.props.isTarget) {
+        cssClass += ' target-cell'
+      } else if (this.props.isPlayer) {
+        cssClass += ' player-cell'
+      } else if (this.props.isOtherPlayer) {
+        cssClass += ' other-player-cell'
+      }
     }
 
-    if (this.props.isSelected) {
-      cssClass += ' selected-cell'
-    } else if (this.props.isTarget) {
-      cssClass += ' target-cell'
-    } else if (this.props.isPlayer) {
-      cssClass += ' player-cell'
-    } else if (this.props.isOtherPlayer) {
-      cssClass += ' other-player-cell'
-    }
+    if (cssClass.indexOf("attacked-cell") > 0)
+      console.log(`{${this.props.point.x}:${this.props.point.y}}: ${cssClass}`)
 
     return cssClass
   }

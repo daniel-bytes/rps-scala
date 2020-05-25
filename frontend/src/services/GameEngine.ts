@@ -53,6 +53,10 @@ export default class GameEngine {
     return game.tokens.find(t => t.position.x === p.x && t.position.y === p.y)
   }
 
+  static getTokens(game: models.Game, p: models.Point): models.Token[] {
+    return game.tokens.filter(t => t.position.x === p.x && t.position.y === p.y)
+  }
+
   static isMovableTokenType(t: models.Token): boolean {
     return t.tokenType === models.TokenType.rock ||
       t.tokenType === models.TokenType.paper ||

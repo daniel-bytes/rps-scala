@@ -47,7 +47,8 @@ const CombatNotifications: React.FunctionComponent<CombatNotificationsProps> = (
 
     if (combats.length > 0) {
       const combatNotifications = combats.map(x => (
-        <CombatNotification 
+        <CombatNotification
+          key={`combat:${x.from.x}:${x.from.y}:${x.to.x}:${x.to.y}`}
           combat={x.combatSummary!} 
           theirName={game.otherPlayerName}
           yourMove={game.playerId === x.playerId} />
@@ -64,7 +65,18 @@ const Subtitle: React.FunctionComponent<SubtitleProps> = (props) => {
   if (props.applicationStore.loggedIn) {
     if (props.applicationStore.game) {
       if (props.applicationStore.game.isGameOver) {
-        return <div>Game Over: {props.applicationStore.game.winnerName} wins!</div>
+        return (
+        <div>
+          Game Over: {props.applicationStore.game.winnerName} wins!
+          <div>
+            <button
+                id="new-game-button"
+                onClick={ props.applicationStore!.endGameButtonPressedAsync }>
+              Start A New Game
+            </button>
+          </div>
+        </div>
+        )
       } else if (props.applicationStore.game.isPlayerTurn) {
         return <div>Your turn</div>
       } 
