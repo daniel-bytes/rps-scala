@@ -5,17 +5,13 @@ import com.danielbytes.rps.helpers.{ Helpers, RandomHelper }
 import com.danielbytes.rps.model._
 import org.scalatest._
 
-class PlayerAIRulesSpec
-    extends WordSpec
-    with Matchers
-    with PlayerAIRules
-    with GameTestData
-    with Helpers {
+class PlayerAIRulesSpec extends WordSpec with Matchers with PlayerAIRules with GameTestData with Helpers {
   val moveRules: MoveRules = new MoveRules {}
 
-  override def random: RandomHelper = new RandomHelper {
-    override def nextDouble(): Double = 1.0 / jitterFactor
-  }
+  override def random: RandomHelper =
+    new RandomHelper {
+      override def nextDouble(): Double = 0.0
+    }
 
   "PlayerAIRules" should {
     "handle computeMove rules" should {
@@ -23,7 +19,14 @@ class PlayerAIRulesSpec
         "return the best possible move" in {
           computeMove(game, pid1) should ===(
             Right(
-              AttackMove(Point(0, 1), Point(0, 2), MoveForward, Token(pid1, Rock), Token(pid2, Scissor))
+              AttackMove(
+                Point(0, 1),
+                Point(0, 2),
+                MoveForward,
+                Token(pid1, Rock),
+                Token(pid2, Scissor),
+                MoveDistance(2)
+              )
             )
           )
         }
@@ -46,7 +49,14 @@ class PlayerAIRulesSpec
         "return the best possible move" in {
           computeMove(game.withCurrentPlayer(pid2), pid2) should ===(
             Right(
-              AttackMove(Point(0, 2), Point(0, 1), MoveForward, Token(pid2, Scissor), Token(pid1, Rock))
+              AttackMove(
+                Point(0, 2),
+                Point(0, 1),
+                MoveForward,
+                Token(pid2, Scissor),
+                Token(pid1, Rock),
+                MoveDistance(1)
+              )
             )
           )
         }
@@ -68,8 +78,15 @@ class PlayerAIRulesSpec
                     y0  | F1 |    |    |
                         ----------------
                           x0   x1   x2   */
-                TakePositionMove(Point(0, 1), Point(1, 1), MoveRight),
-                AttackMove(Point(0, 1), Point(0, 2), MoveForward, Token(pid1, Rock), Token(pid2, Scissor))
+                TakePositionMove(Point(0, 1), Point(1, 1), MoveRight, MoveDistance(1)),
+                AttackMove(
+                  Point(0, 1),
+                  Point(0, 2),
+                  MoveForward,
+                  Token(pid1, Rock),
+                  Token(pid2, Scissor),
+                  MoveDistance(2)
+                )
               )
             )
           )
@@ -90,8 +107,15 @@ class PlayerAIRulesSpec
                     y0  | F1 |    |    |
                         ----------------
                           x0   x1   x2   */
-                TakePositionMove(Point(0, 2), Point(1, 2), MoveRight),
-                AttackMove(Point(0, 2), Point(0, 1), MoveForward, Token(pid2, Scissor), Token(pid1, Rock))
+                TakePositionMove(Point(0, 2), Point(1, 2), MoveRight, MoveDistance(0)),
+                AttackMove(
+                  Point(0, 2),
+                  Point(0, 1),
+                  MoveForward,
+                  Token(pid2, Scissor),
+                  Token(pid1, Rock),
+                  MoveDistance(1)
+                )
               )
             )
           )
@@ -100,4 +124,3 @@ class PlayerAIRulesSpec
     }
   }
 }
-

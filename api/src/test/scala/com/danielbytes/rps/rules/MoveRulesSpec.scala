@@ -5,18 +5,14 @@ import com.danielbytes.rps.helpers.Helpers
 import com.danielbytes.rps.model._
 import org.scalatest._
 
-class MoveRulesSpec
-    extends WordSpec
-    with Matchers
-    with MoveRules
-    with GameTestData
-    with Helpers {
+class MoveRulesSpec extends WordSpec with Matchers with MoveRules with GameTestData with Helpers {
   "MoveRules" should {
     "handle moveToken rule" should {
       "allow a token move" in {
         val from = Point(0, 1)
         val to = Point(1, 1)
-        moveToken(game, pid1, from, to) should ===( /*
+        moveToken(game, pid1, from, to) should ===(
+          /*
                ----------------
            y2  | S2 |    | F2 |
                ----------------
@@ -25,14 +21,15 @@ class MoveRulesSpec
            y0  | F1 |    |    |
                ----------------
                  x0   x1   x2    */
-          Right(TakePositionMove(from, to, MoveRight))
+          Right(TakePositionMove(from, to, MoveRight, MoveDistance(1)))
         )
       }
 
       "allow a token attack" in {
         val from = Point(0, 1)
         val to = Point(0, 2)
-        moveToken(game, pid1, from, to) should ===( /*
+        moveToken(game, pid1, from, to) should ===(
+          /*
                ----------------------
            y2  | R1 -> S2 |    | F2 |
                ----------------------
@@ -41,7 +38,7 @@ class MoveRulesSpec
            y0  |    F1    |    |    |
                ----------------------
                     x0      x1    x2    */
-          Right(AttackMove(from, to, MoveForward, Token(pid1, Rock), Token(pid2, Scissor)))
+          Right(AttackMove(from, to, MoveForward, Token(pid1, Rock), Token(pid2, Scissor), MoveDistance(2)))
         )
       }
 

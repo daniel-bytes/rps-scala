@@ -76,12 +76,12 @@ trait GameRules {
     game: Game,
     from: Point,
     to: Point,
-    moveResult: MoveResult
+    moveResult: PotentialMove
   ): Either[RuleViolationError, GameWithMoveSummary] = {
     moveResult match {
-      case TakePositionMove(f, t, _) =>
+      case TakePositionMove(f, t, _, _) =>
         Right(movePoint(game, f, t))
-      case AttackMove(f, t, _, attacker, defender) =>
+      case AttackMove(f, t, _, attacker, defender, _) =>
         handleCombat(game, f, t, attacker, defender)
     }
   }

@@ -6,6 +6,7 @@ import com.danielbytes.rps.model._
  * Trait that defines the token move rules engine.
  */
 trait MoveRules {
+
   /**
    * Move a token from one point to another
    * @param game The game
@@ -21,7 +22,7 @@ trait MoveRules {
     userId: UserId,
     from: Point,
     to: Point
-  ): Either[RuleViolationError, MoveResult] = {
+  ): Either[RuleViolationError, PotentialMove] = {
     for {
       _ <- validatePlayer(game, userId)
       source <- validateSourceToken(game, from)
@@ -104,12 +105,13 @@ trait MoveRules {
     source: Token,
     to: Point,
     dest: Option[Token]
-  ): Either[RuleViolationError, MoveResult] = {
+  ): Either[RuleViolationError, PotentialMove] = {
     for {
       direction <- calculateDirection(from, to, game.currentPlayer)
+      distance = calculateDistance(to, game.currentPlayer, game.board.geometry)
       result <- dest match {
-        case Some(dest) => Right(AttackMove(from, to, direction, source, dest))
-        case None => Right(TakePositionMove(from, to, direction))
+        case Some(dest) => Right(AttackMove(from, to, direction, source, dest, distance))
+        case None => Right(TakePositionMove(from, to, direction, distance))
       }
     } yield result
   }
@@ -136,7 +138,22 @@ trait MoveRules {
       case _ => Left(MoveIsTooFarError)
     }
   }
+
+  /**
+   * Calculates the distance of a Point from the player's start position
+   * @param to The point to calculate
+   * @param player The player making the move
+   * @param geometry The game board geometry
+   * @return The distance
+   */
+  private def calculateDistance(to: Point, player: Player, geometry: Geometry): MoveDistance = {
+    player.position match {
+      case StartPositionBottom =>
+        MoveDistance(to.y)
+      case StartPositionTop =>
+        MoveDistance(geometry.rows - 1 - to.y)
+    }
+  }
 }
 
-class MoveRulesEngine()
-  extends MoveRules {}
+class MoveRulesEngine() extends MoveRules {}

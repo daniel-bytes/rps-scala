@@ -7,6 +7,7 @@ import com.danielbytes.rps.model._
  * Trait that defines the computer player's AI rules.
  */
 trait PlayerAIRules {
+
   /**
    * Moves rule engine
    */
@@ -18,11 +19,6 @@ trait PlayerAIRules {
   def random: RandomHelper
 
   /**
-   * Max jitter factor
-   */
-  final val jitterFactor: Double = 2.0
-
-  /**
    * A player takes a turn in the game
    *
    * @param game The game state
@@ -32,7 +28,7 @@ trait PlayerAIRules {
   def computeMove(
     game: Game,
     userId: UserId
-  ): Either[RuleViolationError, MoveResult] = {
+  ): Either[RuleViolationError, PotentialMove] = {
     for {
       moves <- computePossibleMoves(game, userId)
       move <- computeMove(game, userId, moves)
@@ -50,21 +46,43 @@ trait PlayerAIRules {
   private def computeMove(
     game: Game,
     userId: UserId,
-    moves: Set[MoveResult]
-  ): Either[RuleViolationError, MoveResult] = {
-    moves
-      .toList
-      .sortBy {
-        case AttackMove(_, _, _, _, _) => withJitter(1)
-        case TakePositionMove(_, _, direction) => direction match {
-          case MoveForward => withJitter(2)
-          case _ => withJitter(3)
-        }
-      }
-      .headOption
-      .map(Right(_))
-      .getOrElse(Left(NoMovableTokens))
+    moves: Set[PotentialMove]
+  ): Either[RuleViolationError, PotentialMove] = {
+    if (moves.nonEmpty) {
+      val sortedMoves = sortMovesAggressive(moves)
+      val index = getMoveIndex(sortedMoves.length, randomFactor = .2)
+
+      Right(sortedMoves(index))
+    } else {
+      Left(NoMovableTokens)
+    }
   }
+
+  /**
+   * Sorts a set of potential moves, with attack moves having the highest possible ranking
+   * and favoring moves closer to the other player's side of the board.
+   * @param moves The set of moves
+   * @return The sorted array of moves
+   */
+  private def sortMovesAggressive(moves: Set[PotentialMove]): Array[PotentialMove] =
+    moves.toArray.sortBy {
+      case m: AttackMove => 100 + m.distance.value
+      case TakePositionMove(_, _, MoveForward, distance) => 50 + distance.value
+      case m => m.distance.value
+    }.reverse
+
+  /**
+   * Calculate move index using a random factor.
+   * Assumes index 0 is the best possible move according for the chosen algorithm.
+   * @param numMoves Number of moves available
+   * @param randomFactor Percent chance (0.0 to 1.0) that a move will be random.
+   * @return The move index value
+   */
+  private def getMoveIndex(numMoves: Int, randomFactor: Double): Int =
+    random.nextDouble() match {
+      case rnd if (numMoves < 2) || (rnd >= randomFactor) => 0
+      case _ => ((numMoves - 1) * random.nextDouble()).toInt
+    }
 
   /**
    * Computes all possible moves a player can make
@@ -76,16 +94,13 @@ trait PlayerAIRules {
   private[rules] def computePossibleMoves(
     game: Game,
     userId: UserId
-  ): Either[RuleViolationError, Set[MoveResult]] = {
-    val movableTokens = game
-      .board
+  ): Either[RuleViolationError, Set[PotentialMove]] = {
+    val movableTokens = game.board
       .playerTokens(userId)
       .collect { case t if t.movable => t }
       .toSet
 
-    val moves = game
-      .board
-      .tokens
+    val moves = game.board.tokens
       .filter {
         case (_, point) => movableTokens.contains(point)
       }
@@ -122,8 +137,6 @@ trait PlayerAIRules {
       point -> point.copy(y = point.y - 1)
     ).filter(pts => geometry.contains(pts._2))
   }
-
-  private def withJitter(value: Double): Double = (random.nextDouble() * jitterFactor) * value
 }
 
 class PlayerAIRulesEngine(
