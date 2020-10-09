@@ -5,10 +5,9 @@ import { IGameService } from './GameService'
 import { ISessionService } from './SessionService'
 import GameEngine from './GameEngine'
 import { ApiError } from '../errors/ApiError'
-import { resolve } from 'dns'
 
 export interface IApplicationStore {
-  readonly apiError: string | null
+  readonly apiError: ApiError | null
   readonly isLoading: boolean
   readonly sessionInitialized: boolean
   readonly loggedIn: boolean
@@ -54,7 +53,7 @@ export class ApplicationStore implements IApplicationStore {
   }
 
   @observable
-  public apiError: string | null = null
+  public apiError: ApiError | null = null
 
   @observable 
   public loadingCount = 0
@@ -328,17 +327,27 @@ export class ApplicationStore implements IApplicationStore {
       console.error(`API error: ${e.message}`)
 
       if (e instanceof ApiError) {
+        let apiError: ApiError | null = null
+
         if (e.status === 401) {
           this._sessionStore.clearSessionState()
+          this.sessionInitialized = false
+          this.loggedIn = false
+
+          if (e.code === 'unknown') {
+            apiError = e
+          }
         } else if (e.status === 404) {
           await this.initializeGameAppAsync()
         } else if (e.status === 409) {
           // reload app on version conflict
           await this.initializeGameAppAsync()
+        } else {
+          apiError = e
         }
-        
+
         runInAction(() => {
-          this.apiError = e.code
+          this.apiError = apiError
         })
       }
     } finally {

@@ -152,6 +152,7 @@ export class ApiClient implements IApiClient {
   {
     if (response.status < 300) {
       const body = await response.json() as TRes
+      
       return {
         status: response.status,
         body: body,
@@ -159,11 +160,36 @@ export class ApiClient implements IApiClient {
       }
     }
 
-    const responseBody = await response.json()
+    if (response.headers.get('content-type')?.indexOf("json")) {
+      const responseBody = await response.json()
+      const errorCode = responseBody.code || 'unknown'
+      const errorMessage = responseBody.message || this.errorMessageFromCode(errorCode)
+  
+      throw new errors.ApiError(
+        response.status, 
+        errorCode,
+        errorMessage,
+        new Map<string, string>(response.headers))
+    } else {
+      const responseBody = await response.text()
 
-    throw new errors.ApiError(
-      response.status, 
-      responseBody.code || 'unknown',
-      new Map<string, string>(response.headers))
+      throw new errors.ApiError(
+        response.status, 
+        'unknown',
+        responseBody,
+        new Map<string, string>(response.headers))
+    }
+  }
+
+  private errorMessageFromCode(code: errors.ApiErrorCode): string {
+    switch(code) {
+      case 'not-a-movable-token': 
+        return 'Not a movable token'
+      case 'version-conflict':
+      case 'game-not-found':
+        return 'Game was out of sync and had to be refreshed, try again'
+      default: 
+        return 'An error occured'
+    }
   }
 }

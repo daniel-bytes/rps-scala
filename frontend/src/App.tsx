@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { ActionButtons } from './components/ActionButtons'
+import ErrorBox from './components/ErrorBox'
 import Notifications from './components/Notifications'
 import GameApp from './components/GameApp'
 import Instructions from './components/Instructions'
@@ -27,9 +28,13 @@ export default class App extends Component<Props> {
   }
 
   render() {
-    return this.props.applicationStore!.sessionInitialized 
-      ? this.renderApp()
-      : this.renderLoading()
+    if (this.props.applicationStore!.sessionInitialized) {
+      return this.renderApp()
+    } else if (this.props.applicationStore!.apiError) {
+      return this.renderError()
+    } else {
+      return this.renderLoading()
+    }
   }
 
   private renderApp() {
@@ -61,5 +66,12 @@ export default class App extends Component<Props> {
 
   private renderLoading() {
     return <div className="container">loading session...</div>
+  }
+
+  private renderError() {
+    return (
+      <ErrorBox 
+        onClearError={ () => this.props.applicationStore!.initializeSessionStoreAsync() } />
+    )
   }
 }

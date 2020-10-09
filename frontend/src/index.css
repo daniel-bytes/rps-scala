@@ -35,11 +35,13 @@ em.error {
 
 em.player-token-name {
   font-weight: bold;
+  text-decoration: underline;
   color: rgb(89, 111, 177);
 }
 
 em.other-player-token-name {
   font-weight: bold;
+  text-decoration: underline;
   color: rgb(15, 70, 61);
 }
 
