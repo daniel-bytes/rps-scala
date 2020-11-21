@@ -15,8 +15,8 @@ export const ActionButtons: React.SFC<Props> = inject("applicationStore")(observ
   const loginGoogleStyle = authenticationType === AuthenticationType.Google &&  
     props.applicationStore.navState === NavigationState.LoginPage ? 'inline' : 'none'
 
-  const loginAnonymousStyle = authenticationType === AuthenticationType.Anonymous &&  
-    props.applicationStore.navState === NavigationState.LoginPage ? 'inline' : 'none'
+  // for anonymous auth, player should use the "Start A New Game" button
+  const loginAnonymousStyle = 'none'
 
   const logoutStyle = props.applicationStore.navState !== NavigationState.LoginPage ? 'inline' : 'none'
 

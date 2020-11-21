@@ -50,10 +50,10 @@ const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(
           <em>Scissor</em> beats <em>Paper</em>
         </li>
         <li>
-          <em>Bomb</em> can't be moved.  If a player attacks a <em>Bomb</em>, both pieces lose
+          <em>Bomb</em> can't be moved.  If a player's piece attacks a <em>Bomb</em>, both pieces lose
         </li>
         <li>
-          <em>Flag</em> can't be moved.  If a player attacks the other player's <em>Flag</em>, they win the game
+          <em>Flag</em> can't be moved.  If a player's piece attacks the other player's <em>Flag</em>, they win the game
         </li>
       </ol>
 
@@ -65,7 +65,7 @@ const Instructions: React.FunctionComponent<Props> = inject("applicationStore")(
           If a player run's out of movable pieces, the other player wins
         </li>
         <li>
-          If a token attacks another piece of the same type (<em>Rock</em> attacks <em>Rock</em>, for example),
+          If a player's piece attacks another piece of the same type (<em>Rock</em> attacks <em>Rock</em>, for example),
           both pieces lose
         </li>
       </ol>
