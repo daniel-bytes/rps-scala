@@ -3,3 +3,4 @@ ssl
 .metals/
 .vscode/
 target/
+ui/elm-stuff/
