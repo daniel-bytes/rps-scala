@@ -10,8 +10,8 @@ object GameApiModel {
   /**
    * A move taken in the game
    *
-   * @param from    The move starting point
-   * @param to      The move endpoint point
+   * @param from The move starting point
+   * @param to The move endpoint point
    * @param version The version number of the game (for optimistic concurrency)
    */
   case class GameMove(
@@ -79,6 +79,7 @@ object GameApiModel {
 
     /**
      * Creates an API GameOverview from a domain GameWithStatus
+     *
      * @param userId The current player's user id
      * @param model The domain Game model
      * @return The API GameOverview model
@@ -122,9 +123,9 @@ object GameApiModel {
    * @param winnerName Optional name of the winner (empty unless isGameOver is true)
    * @param board The game board
    * @param tokens The set of tokens on the game board.
-   *               Only the current player's token types are available.
+   * Only the current player's token types are available.
    * @param recentMoves A list of recent moves by both players.
-   *                    Useful for a frontend to show animations and move summary.
+   * Useful for a frontend to show animations and move summary.
    * @param version The version number of the game (for optimistic concurrency)
    */
   case class Game(
@@ -144,6 +145,7 @@ object GameApiModel {
 
     /**
      * Creates a new API Game model from a domain GameWithStatus model
+     *
      * @param game The domain Fame model
      * @param userId The current player's user id
      * @return The API Fame model
@@ -154,7 +156,13 @@ object GameApiModel {
         y <- 0 to game.game.board.geometry.rows
         token = game.game.board.tokens.get(Domain.Point(x, y))
         playerOwned = token.exists(_.owner == userId)
-        tokenType <- token.map { t => if (playerOwned) t.tokenType.name else Domain.Token.other }
+        tokenType <- (token, game.status) match {
+          case (None, _) => None
+          case (Some(t), Domain.GameInProgress) => Some(
+            if (playerOwned) t.tokenType.name else Domain.Token.other)
+          // show other player's tokens if game is over
+          case (Some(t), _) => Some(t.tokenType.name)
+        }
       } yield Token(Domain.Point(x, y), tokenType, playerOwned)
 
       val (isGameOver: Boolean, winnerId: Option[Domain.UserId]) = game.status match {
