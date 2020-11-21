@@ -24,18 +24,27 @@ interface SubtitleProps {
 
 const CombatNotification: React.FunctionComponent<CombatNotificationProps> = (props) => {
   const yourToken = props.yourMove ? props.combat.attackerTokenType : props.combat.defenderTokenType
-  const youAreAttacker = props.combat.attackerTokenType === yourToken
+  const youAreWinner = props.combat.winnerTokenType === yourToken
+
+  const attackerName = props.yourMove ? 'Your ' : `${props.theirName}'s `
+  const attackerClass = props.yourMove ? 'player-token-name' : 'other-player-token-name'
+
+  const defenderName = props.yourMove ? ` ${props.theirName}'s ` : ' your '
+  const defenderClass = props.yourMove ? 'other-player-token-name' : 'player-token-name'
+
+  const winnerName = youAreWinner ? 'Your' : 'Their'
+  const winnerClass = youAreWinner ? 'player-token-name' : 'other-player-token-name'
 
   const result = props.combat.winnerTokenType 
-    ? (<span>{youAreAttacker ? 'Your' : 'Their'} <em className={youAreAttacker ? 'player-token-name' : 'other-player-token-name'}>{props.combat.winnerTokenType}</em> wins!</span>)
+    ? (<span>{winnerName} <em className={winnerClass}>{props.combat.winnerTokenType}</em> wins!</span>)
     : (<span> Everybody loses</span>)
   
   return (
     <div>
-      { props.yourMove ? 'Your ' : `${props.theirName}'s `}
-      <em className={props.yourMove ? 'player-token-name' : 'other-player-token-name'}>{props.combat.attackerTokenType}</em> attacked
-      { props.yourMove ? ` ${props.theirName}'s ` : ' your '}
-      <em className={props.yourMove ? 'other-player-token-name' : 'player-token-name'}>{props.combat.defenderTokenType}</em> - { result }
+      { attackerName }
+      <em className={attackerClass}>{props.combat.attackerTokenType}</em> attacked
+      { defenderName }
+      <em className={defenderClass}>{props.combat.defenderTokenType}</em> - { result }
     </div>
   )
 }
