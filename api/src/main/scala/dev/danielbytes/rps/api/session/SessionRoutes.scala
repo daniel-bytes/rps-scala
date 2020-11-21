@@ -16,12 +16,16 @@ import io.circe.generic.auto._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
+/**
+ * Session routes, used to serve the session management APIs.
+ */
 class SessionRoutes(
   val system: ActorSystem[Nothing],
   val googleAuthenticationService: GoogleAuthenticationService,
   val anonymousAuthenticationService: AnonymousAuthenticationService)(implicit val ec: ExecutionContext)
   extends ApplicationSessionDirectives
   with Encoders {
+  import SessionApiModel._
 
   def routes: Route =
     pathPrefix("session") {
@@ -30,7 +34,7 @@ class SessionRoutes(
           entity(as[GoogleTokenRequest]) { token =>
             authenticate(token) { user =>
               createSession(user) { session =>
-                complete(Future.successful(SessionApiModel(session)))
+                complete(Future.successful(Session(session)))
               }
             }
           }
@@ -41,7 +45,7 @@ class SessionRoutes(
             entity(as[AnonymousTokenRequest]) { token =>
               authenticate(token) { user =>
                 createSession(user) { session =>
-                  complete(Future.successful(SessionApiModel(session)))
+                  complete(Future.successful(Session(session)))
                 }
               }
             }
@@ -51,7 +55,7 @@ class SessionRoutes(
           concat(
             get {
               requireSession { session =>
-                complete(Future.successful(SessionApiModel(session)))
+                complete(Future.successful(Session(session)))
               }
             },
             delete {

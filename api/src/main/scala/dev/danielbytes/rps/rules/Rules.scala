@@ -1,5 +1,8 @@
 package dev.danielbytes.rps.rules
 
+/**
+ * Wrapper class that houses instances of all rule engine default implementations
+ */
 class Rules {
   lazy val combatRules: CombatRules = new CombatRules.Impl()
   lazy val moveRules: MoveRules = new MoveRules.Impl()

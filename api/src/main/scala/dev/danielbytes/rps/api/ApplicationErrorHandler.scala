@@ -2,18 +2,27 @@ package dev.danielbytes.rps.api
 
 import akka.http.scaladsl.server._
 import Directives._
-import akka.actor.typed.ActorSystem
 import akka.http.scaladsl.model.StatusCodes
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import dev.danielbytes.rps.model.ApplicationErrorException
 import io.circe.generic.auto._
 import org.slf4j.Logger
 
-// Error models
+/**
+ * API error model
+ * @param code The error code
+ */
 case class ErrorResponse(code: String)
 
+/**
+ * Handler for managing API rejections and exceptions
+ */
 trait ApplicationErrorHandler {
 
+  /**
+   * Rejection handler, for handling authn/z rejections and
+   * unknown exceptions
+   */
   def rejectionHandler(logger: Logger): RejectionHandler =
     RejectionHandler
       .newBuilder()
@@ -31,6 +40,10 @@ trait ApplicationErrorHandler {
       }
       .result()
 
+  /**
+   * Exception handler, for handling known application level exceptions,
+   * transforming them to error responses.
+   */
   def exceptionHandler(logger: Logger): ExceptionHandler =
     ExceptionHandler {
       case e: ApplicationErrorException => {

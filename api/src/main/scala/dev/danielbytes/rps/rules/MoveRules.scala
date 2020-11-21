@@ -141,5 +141,8 @@ trait MoveRules {
 }
 
 object MoveRules {
+  /**
+   * Default implementation of Game Move rules engine
+   */
   class Impl() extends MoveRules
 }

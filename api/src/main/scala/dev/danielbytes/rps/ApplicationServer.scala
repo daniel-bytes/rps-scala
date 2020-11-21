@@ -17,6 +17,10 @@ import dev.danielbytes.rps.services.Services
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ Await, ExecutionContext }
 
+/**
+ * API application server.
+ * This is the top-level class that runs the API server application.
+ */
 object ApplicationServer extends ApplicationErrorHandler with Encoders {
 
   def main(args: Array[String]): Unit = {

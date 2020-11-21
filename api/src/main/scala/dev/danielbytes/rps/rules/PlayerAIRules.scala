@@ -126,5 +126,8 @@ trait PlayerAIRules extends RandomHelper {
 }
 
 object PlayerAIRules {
+  /**
+   * Default implementation of Player AI rules engine
+   */
   class Impl(val moveRules: MoveRules) extends PlayerAIRules
 }

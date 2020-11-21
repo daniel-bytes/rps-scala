@@ -1,12 +1,9 @@
 package dev.danielbytes.rps.services
 
-import dev.danielbytes.rps.rules._
 import dev.danielbytes.rps.model._
 import cats.data.EitherT
 import cats.implicits._
-import dev.danielbytes.rps.helpers.RandomHelper
 import dev.danielbytes.rps.services.repositories.GameRepository
-import dev.danielbytes.rps.helpers.RandomHelper
 import dev.danielbytes.rps.model.{ ApplicationError, GameNotFoundError, Point, StartPositionBottom, VersionConflictError }
 import dev.danielbytes.rps.rules.{ BoardRules, GameRules, PlayerAIRules }
 
@@ -22,12 +19,16 @@ trait GameService {
   implicit def ec: ExecutionContext
 
   def gameRepository: GameRepository
+
   def gameRules: GameRules
+
   def aiRules: PlayerAIRules
+
   def boardRules: BoardRules
 
   /**
    * Fetches all games for a player
+   *
    * @param userId The player Id
    * @param includeCompleted If true completed games are also returned
    * @return The list of games
@@ -51,6 +52,7 @@ trait GameService {
 
   /**
    * Fetches a game by Id
+   *
    * @param gameId The game Id
    * @param userId The current player Id
    * @return The game
@@ -65,6 +67,7 @@ trait GameService {
 
   /**
    * Creates a new single player game
+   *
    * @param user The player Id
    * @return The game
    */
@@ -79,6 +82,7 @@ trait GameService {
 
   /**
    * Deletes a game by Id
+   *
    * @param gameId The game Id
    * @param userId The current player Id
    */
@@ -92,6 +96,7 @@ trait GameService {
 
   /**
    * Process a game turn for a player
+   *
    * @param gameId The current game Id
    * @param userId The current player Id
    * @param from The point the player is moving from
@@ -117,6 +122,7 @@ trait GameService {
 
   /**
    * Fetches the game state from the repository
+   *
    * @param game The game
    * @param version The expected version
    * @return The game, or an error
@@ -131,6 +137,7 @@ trait GameService {
 
   /**
    * Fetches the game state from the repository
+   *
    * @param gameId The id of the game
    * @return The game, or an error
    */
@@ -145,6 +152,7 @@ trait GameService {
 
   /**
    * Stores the game state to the repository
+   *
    * @param gameId The id of the game
    * @param game The game state
    * @return The saved game, or an error
@@ -158,6 +166,7 @@ trait GameService {
 
   /**
    * Deletes a game in the repository
+   *
    * @param gameId The id of the game
    */
   private def deleteGameFromRepository(gameId: GameId): IntermediateResult[Unit] =
@@ -169,6 +178,7 @@ trait GameService {
 
   /**
    * Asserts the requested player can access the game
+   *
    * @param game The game state
    * @param userId The player Id
    * @return The game, or an error
@@ -186,6 +196,7 @@ trait GameService {
 
   /**
    * Process a game turn for a player
+   *
    * @param game The current game state
    * @param userId The current player Id
    * @param from The point the player is moving from
@@ -201,6 +212,7 @@ trait GameService {
 
   /**
    * Process an AI turn if the current player is AI
+   *
    * @param game The current game state
    * @param status The game status
    * @return The original or updated game status
@@ -222,6 +234,7 @@ trait GameService {
 
   /**
    * Calculates the game status from the game state
+   *
    * @param game The current game state
    * @return The game status
    */
@@ -235,6 +248,9 @@ trait GameService {
 
 object GameService {
 
+  /**
+   * Default implementation of Game service
+   */
   class Impl(
     val gameRepository: GameRepository,
     val gameRules: GameRules,

@@ -156,5 +156,8 @@ trait GameRules {
 }
 
 object GameRules {
+  /**
+   * Default implementation of Game rules engine
+   */
   class Impl(val moveRules: MoveRules, val combatRules: CombatRules) extends GameRules
 }

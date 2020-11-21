@@ -12,17 +12,35 @@ import dev.danielbytes.rps.model.AuthenticationError
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-case class GoogleTokenRequest(id: String, name: String, authCode: String) extends TokenRequest
+/**
+ * Google OAuth token request
+ * @param id The id of the Google user principal
+ * @param name The name of the Google user
+ * @param authCode The Google auth code
+ */
+case class GoogleTokenRequest(
+  id: String,
+  name: String,
+  authCode: String) extends TokenRequest
 
+/**
+ * Google OAuth service contract
+ */
 trait GoogleAuthenticationService extends AuthenticationService {
   type Request = GoogleTokenRequest
 }
 
 object GoogleAuthenticationService extends DateTimeHelper {
 
+  /**
+   * Default implementation of the Google OAuth service
+   */
   class Impl()(implicit ec: ExecutionContext) extends GoogleAuthenticationService {
     private type GoogleAuthnResponse = Future[Either[AuthenticationError, GoogleTokenResponse]]
 
+    /**
+     * Authenticates a Google Oauth request
+     */
     def authenticate(request: Request): Response =
       authenticateGoogle(createAuthnRequest(request)).map(_.map(_ => createUser(request)))
 

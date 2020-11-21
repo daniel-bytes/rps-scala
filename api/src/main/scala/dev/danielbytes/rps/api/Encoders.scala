@@ -6,8 +6,14 @@ import io.circe.Decoder.Result
 import io.circe.{ Decoder, Encoder, HCursor, Json }
 import shapeless.Unwrapped
 
+/**
+ * Circe encoders and decoders for JSON (de)serialization
+ */
 trait Encoders {
 
+  /**
+   * Converts LocalDateTime timestamp to/from Long epoch
+   */
   implicit val TimestampFormat: Encoder[LocalDateTime] with Decoder[LocalDateTime] =
     new Encoder[LocalDateTime] with Decoder[LocalDateTime] {
 
@@ -18,7 +24,10 @@ trait Encoders {
         Decoder.decodeLong.map(s => LocalDateTime.ofInstant(Instant.ofEpochMilli(s), ZoneId.systemDefault())).apply(c)
     }
 
-  // see https://github.com/circe/circe/issues/297
+  /**
+   * Converts Enumerations to/from string.
+   * see https://github.com/circe/circe/issues/297
+   */
   implicit def enumEncoder[E <: Enumeration](enum: E) =
     new Encoder[E#Value] {
       override def apply(a: E#Value): Json = Encoder.encodeString.apply(a.toString)
@@ -29,7 +38,10 @@ trait Encoders {
       override def apply(c: HCursor): Result[E#Value] = Decoder.decodeString.map(str => enum.withName(str)).apply(c)
     }
 
-  // see https://www.programcreek.com/scala/io.circe.Decoder
+  /**
+   * Converts AnyVals to underlying value
+   * see https://www.programcreek.com/scala/io.circe.Decoder
+   */
   implicit def anyValEncoder[V, U](implicit
     ev: V <:< AnyVal,
     V: Unwrapped.Aux[V, U],
@@ -38,6 +50,10 @@ trait Encoders {
     encoder.contramap(V.unwrap)
   }
 
+  /**
+   * Converts AnyVals from underlying value
+   * see https://www.programcreek.com/scala/io.circe.Decoder
+   */
   implicit def anyValDecoder[V, U](implicit
     ev: V <:< AnyVal,
     V: Unwrapped.Aux[V, U],

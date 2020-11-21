@@ -4,17 +4,20 @@ import java.util.UUID
 
 import dev.danielbytes.rps.model._
 import dev.danielbytes.rps.helpers.{ DateTimeHelper, RandomHelper }
-import dev.danielbytes.rps.helpers.{ DateTimeHelper, RandomHelper }
 
+/**
+ * Trait that defines the Game Board rules engine
+ */
 trait BoardRules extends DateTimeHelper with RandomHelper {
 
   /**
-   * Generates a new random single player game
+   * Generates a new random single player game with default parameters applied
    * @param player The human player
    * @return The generated game
    */
   def generateRandomSinglePlayerGame(player: Player): Game = {
-    val player2 = Player.ai(if (player.position == StartPositionTop) StartPositionBottom else StartPositionTop)
+    val player2 = Player.ai(
+      if (player.position == StartPositionTop) StartPositionBottom else StartPositionTop)
 
     Game(
       GameId(UUID.randomUUID().toString),
@@ -25,6 +28,7 @@ trait BoardRules extends DateTimeHelper with RandomHelper {
       GameVersion(1))
   }
 
+  // Generates a new random game board with fine-grained parameters
   private def generateRandomBoard(
     player1: Player,
     player2: Player,
@@ -86,5 +90,9 @@ trait BoardRules extends DateTimeHelper with RandomHelper {
 }
 
 object BoardRules {
+
+  /**
+   * Default implementation of Game Board rules engine
+   */
   class Impl() extends BoardRules
 }

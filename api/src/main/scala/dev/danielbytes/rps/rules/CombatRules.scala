@@ -32,5 +32,9 @@ trait CombatRules {
 }
 
 object CombatRules {
+
+  /**
+   * Default implementation of Combat rules engine
+   */
   class Impl() extends CombatRules
 }

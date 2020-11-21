@@ -16,12 +16,17 @@ import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 
+/**
+ * Game API routes
+ */
 class GameRoutes(
   val system: ActorSystem[Nothing],
   val gameService: GameService,
   val googleAuthenticationService: GoogleAuthenticationService,
   val anonymousAuthenticationService: AnonymousAuthenticationService)(implicit val ec: ExecutionContext)
   extends ApplicationSessionDirectives {
+  import GameApiModel._
+
   val logger = system.log
 
   def routes: Route =
@@ -30,7 +35,7 @@ class GameRoutes(
         refreshSession { session =>
           path(Segment / "moves") { id =>
             post {
-              entity(as[GameMoveApiModel]) { req =>
+              entity(as[GameMove]) { req =>
                 complete(
                   gameService
                     .processTurn(GameId(id), session.userId, req.from, req.to, GameVersion(req.version))
@@ -57,7 +62,7 @@ class GameRoutes(
                   gameService
                     .getPlayerGames(session.userId, includeCompleted = true)
                     .apiResult(Some(logger))
-                    .map(r => GameOverviewsApiModel(r.map(g => GameOverviewApiModel(session.userId, g)))))
+                    .map(r => GameOverviews(r.map(g => GameOverview(session.userId, g)))))
               } ~
                 post {
                   complete(
