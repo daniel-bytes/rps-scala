@@ -80,6 +80,10 @@ The frontend UI application is implemented in Typescript using the React framewo
 
 State management is handled by the MobX framework. A top-level `ApplicationStore` service type contains all of the observable state of the application, as well as most of the core business logic for interacting with the API layer.
 
+### Models
+
+The `models` directory houses the core API data models, expressed as Typescript interfaces.
+
 ### Services
 
 Outside of the MobX `ApplicationStore`, a number of other services exist.
