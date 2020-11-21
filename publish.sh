@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo Building frontend package
 pushd ./frontend
